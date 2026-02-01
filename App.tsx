@@ -9,6 +9,7 @@ import { ServersScreen } from './mobile/screens/ServersScreen';
 import { ProfileScreen } from './mobile/screens/ProfileScreen';
 import { SettingsScreen } from './mobile/screens/SettingsScreen';
 import { SpeedTestScreen } from './mobile/screens/SpeedTestScreen';
+import { AboutScreen } from './mobile/screens/AboutScreen';
 import { StatusBar } from 'expo-status-bar';
 
 const Stack = createNativeStackNavigator();
@@ -33,6 +34,7 @@ export default function App() {
           <Stack.Screen name="Profile" component={ProfileScreen} />
           <Stack.Screen name="Settings" component={SettingsScreen} />
           <Stack.Screen name="SpeedTest" component={SpeedTestScreen} />
+          <Stack.Screen name="About" component={AboutScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     </ConnectionProvider>

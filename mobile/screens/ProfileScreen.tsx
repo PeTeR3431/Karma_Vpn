@@ -96,7 +96,12 @@ export function ProfileScreen() {
                                     <MenuItem icon={BookOpen} label="FAQ & Support" />
                                     <MenuItem icon={Star} label="Rate the app" />
                                     <MenuItem icon={Share2} label="Share" />
-                                    <MenuItem icon={Info} label="About" isLast />
+                                    <MenuItem
+                                        icon={Info}
+                                        label="About"
+                                        isLast
+                                        onPress={() => navigation.navigate('About')}
+                                    />
                                 </LinearGradient>
                             </View>
                         </View>
