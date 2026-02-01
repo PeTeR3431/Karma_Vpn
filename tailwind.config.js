@@ -6,11 +6,11 @@ module.exports = {
             colors: {
                 border: "#27272a", // zinc-800
                 input: "#27272a", // zinc-800
-                ring: "#84cc16", // lime-500
+                ring: "#5c9a3e",
                 background: "#09090b", // zinc-950
                 foreground: "#fafafa", // zinc-50
                 primary: {
-                    DEFAULT: "#84cc16", // lime-500
+                    DEFAULT: "#5c9a3e",
                     foreground: "#09090b", // zinc-950
                 },
                 secondary: {

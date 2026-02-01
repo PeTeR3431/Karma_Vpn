@@ -1,15 +1,6 @@
 import React, { createContext, useContext, useState, ReactNode } from "react";
 
-export type CountryServer = {
-    name: string
-    flag: string
-    code: string
-    locations: number
-    ping: number
-    load: number
-    signal: number
-    category: string
-}
+import { type CountryServer } from "./countries-data";
 
 type ConnectionContextType = {
     isConnected: boolean
@@ -24,13 +15,16 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
     const [isConnected, setIsConnected] = useState(false)
     const [selectedServer, setSelectedServer] = useState<CountryServer>({
         name: "Germany",
+        city: "Frankfurt",
         flag: "🇩🇪",
+        flagUrl: "https://flagcdn.com/w160/de.png",
         code: "DE",
         locations: 8,
         ping: 12,
         load: 25,
         signal: 5,
-        category: "fast"
+        category: "fast",
+        isFree: false
     })
 
     return (

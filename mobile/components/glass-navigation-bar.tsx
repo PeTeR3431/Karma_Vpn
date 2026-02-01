@@ -1,13 +1,13 @@
 import React, { useMemo, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Platform, useWindowDimensions } from 'react-native';
 import { BlurView } from 'expo-blur';
-import { Home, BarChart2, User } from 'lucide-react-native';
+import { Home, BarChart2, User, Zap } from 'lucide-react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import { LinearGradient } from 'expo-linear-gradient';
 import Animated, {
     useSharedValue,
     useAnimatedStyle,
     withSpring,
-    withTiming
 } from 'react-native-reanimated';
 
 export function GlassNavigationBar() {
@@ -17,19 +17,27 @@ export function GlassNavigationBar() {
 
     const tabs = useMemo(() => [
         { id: 'Home', icon: Home, label: 'Home' },
+        { id: 'SpeedTest', icon: Zap, label: 'Speed' },
         { id: 'Stats', icon: BarChart2, label: 'Stats' },
         { id: 'Profile', icon: User, label: 'Profile' },
     ], []);
 
     const activeTab = route.name;
     const activeIndex = useMemo(() => {
-        const index = tabs.findIndex(tab => tab.id === activeTab || (tab.id === 'Home' && activeTab === 'Welcome'));
+        // More robust matching for route names (e.g., Home, HomeScreen, Dashboard)
+        const lowerActive = activeTab.toLowerCase();
+        const index = tabs.findIndex(tab => {
+            const lowerId = tab.id.toLowerCase();
+            return lowerActive === lowerId ||
+                lowerActive.includes(lowerId) ||
+                (tab.id === 'Home' && (lowerActive.includes('dashboard') || lowerActive.includes('welcome')));
+        });
         return index === -1 ? 0 : index;
     }, [activeTab, tabs]);
 
     // Reanimated shared value for sliding indicator
     const translateX = useSharedValue(0);
-    const containerWidth = Math.min(windowWidth - 40, 400); // Same as styles
+    const containerWidth = Math.min(windowWidth - 40, 400);
 
     // Calculate tab width (3 tabs, padding included)
     const paddingHorizontal = 10;
@@ -37,8 +45,8 @@ export function GlassNavigationBar() {
 
     useEffect(() => {
         translateX.value = withSpring(activeIndex * tabWidth, {
-            damping: 20,
-            stiffness: 150,
+            damping: 25,
+            stiffness: 180,
             mass: 0.5
         });
     }, [activeIndex, tabWidth]);
@@ -52,11 +60,13 @@ export function GlassNavigationBar() {
         <View style={styles.container}>
             <BlurView intensity={80} tint="dark" style={styles.blurContainer}>
                 <View style={styles.content}>
-                    {/* Sliding Indicator Background */}
+                    {/* Sliding Indicator Background - Solid Lime Pill */}
+                    {/* Positioned FIRST in the children list to be at the bottom layer */}
                     <Animated.View
                         style={[
                             styles.indicator,
-                            animatedIndicatorStyle
+                            animatedIndicatorStyle,
+                            { backgroundColor: '#5c9a3e' }
                         ]}
                     />
 
@@ -73,8 +83,9 @@ export function GlassNavigationBar() {
                             >
                                 <View style={styles.iconContainer}>
                                     <Icon
-                                        size={22}
-                                        color={isActive ? '#09090b' : '#a1a1aa'}
+                                        size={20}
+                                        color={isActive ? '#000000' : '#71717a'}
+                                        strokeWidth={isActive ? 2.5 : 2}
                                     />
                                     {isActive && (
                                         <Text style={styles.activeLabel}>
@@ -104,7 +115,7 @@ const styles = StyleSheet.create({
         borderRadius: 40,
         overflow: 'hidden',
         borderWidth: 1,
-        borderColor: 'rgba(255, 255, 255, 0.1)',
+        borderColor: 'rgba(255, 255, 255, 0.08)',
         width: '100%',
         maxWidth: 400,
         ...Platform.select({
@@ -122,33 +133,33 @@ const styles = StyleSheet.create({
     content: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingVertical: 8,
+        paddingVertical: 10,
         paddingHorizontal: 10,
         position: 'relative',
     },
     indicator: {
         position: 'absolute',
-        top: 8,
-        bottom: 8,
+        top: 10,
+        bottom: 10,
         left: 10,
-        backgroundColor: '#84cc16',
         borderRadius: 24,
-        zIndex: -1,
+        overflow: 'hidden',
     },
     tab: {
         flex: 1,
-        height: 44,
+        height: 48,
         alignItems: 'center',
         justifyContent: 'center',
     },
     iconContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 6,
+        gap: 8,
     },
     activeLabel: {
-        color: '#09090b',
-        fontSize: 13,
-        fontWeight: '700',
+        color: '#000000',
+        fontSize: 14,
+        fontWeight: '800',
+        letterSpacing: -0.2,
     },
 });

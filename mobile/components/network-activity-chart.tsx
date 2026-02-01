@@ -69,42 +69,40 @@ export function NetworkActivityChart() {
                 </View>
             </View>
 
-            <View style={{ height, width }}>
-                <Svg height="100%" width="100%" viewBox={`0 0 ${width} ${height}`}>
-                    <Defs>
-                        <LinearGradient id="gradientDownload" x1="0" y1="0" x2="0" y2="1">
-                            <Stop offset="0" stopColor="#84cc16" stopOpacity={0.5} />
-                            <Stop offset="1" stopColor="#84cc16" stopOpacity={0.05} />
-                        </LinearGradient>
-                        <LinearGradient id="gradientUpload" x1="0" y1="0" x2="0" y2="1">
-                            <Stop offset="0" stopColor="#4ade80" stopOpacity={0.3} />
-                            <Stop offset="1" stopColor="#4ade80" stopOpacity={0.05} />
-                        </LinearGradient>
-                    </Defs>
-                    <Path
-                        d={createPath('download')}
-                        fill="url(#gradientDownload)"
-                        stroke="#84cc16"
-                        strokeWidth="2"
-                    />
-                    <Path
-                        d={createPath('upload')}
-                        fill="url(#gradientUpload)"
-                        stroke="#4ade80"
-                        strokeWidth="1.5"
-                    />
-                </Svg>
-            </View>
-
-            {!isConnected && (
-                <View className="absolute inset-0 items-center justify-center bg-zinc-950/80 rounded-2xl">
-                    <View className="items-center p-6">
-                        <View className="w-14 h-14 rounded-full bg-primary/10 items-center justify-center mb-3">
-                            <Text style={{ fontSize: 24 }}>⚡</Text>
-                        </View>
-                        <Text className="text-base font-bold text-foreground">Connect to view activity</Text>
-                        <Text className="text-xs text-muted-foreground mt-1 text-center">Real-time network monitoring enabled</Text>
-                    </View>
+            {isConnected ? (
+                <View style={{ height, width }}>
+                    <Svg height="100%" width="100%" viewBox={`0 0 ${width} ${height}`}>
+                        <Defs>
+                            <LinearGradient id="gradient" x1="0" y1="0" x2="0" y2="1">
+                                <Stop offset="0%" stopColor="#5c9a3e" stopOpacity="0.3" />
+                                <Stop offset="100%" stopColor="#5c9a3e" stopOpacity="0" />
+                            </LinearGradient>
+                            <LinearGradient id="gradientUpload" x1="0" y1="0" x2="0" y2="1">
+                                <Stop offset="0" stopColor="#4ade80" stopOpacity={0.3} />
+                                <Stop offset="1" stopColor="#4ade80" stopOpacity={0.05} />
+                            </LinearGradient>
+                        </Defs>
+                        <Path
+                            d={createPath('download')}
+                            fill="url(#gradient)"
+                            stroke="#5c9a3e"
+                            strokeWidth="3"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                        />
+                        <Path
+                            d={createPath('upload')}
+                            fill="url(#gradientUpload)"
+                            stroke="#4ade80"
+                            strokeWidth="1.5"
+                        />
+                    </Svg>
+                </View>
+            ) : (
+                <View style={{ height, width }} className="items-center justify-center bg-teal-950/20 rounded-xl">
+                    <Text style={{ fontSize: 32 }}>⚡</Text>
+                    <Text className="text-base font-bold text-foreground mt-4">Connect to View Activity</Text>
+                    <Text className="text-xs text-muted-foreground mt-1 text-center">Real-time monitoring will start automatically</Text>
                 </View>
             )}
         </View>

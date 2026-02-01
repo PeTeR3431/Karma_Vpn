@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Animated, {
     useSharedValue,
@@ -9,8 +9,11 @@ import Animated, {
     withSpring,
     withSequence,
     withDelay,
-    interpolate
+    interpolate,
+    interpolateColor,
+    Easing
 } from 'react-native-reanimated';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Shield, Zap, Globe, Settings, Menu, TrendingDown, TrendingUp, ChevronRight } from 'lucide-react-native';
 import { Button } from '@/components/ui/button';
 import { NetworkActivityChart } from '@/components/network-activity-chart';
@@ -30,6 +33,7 @@ export function DashboardContent({ showChart = true }: { showChart?: boolean }) 
     const iconScale = useSharedValue(1);
     const glowValue = useSharedValue(0);
     const idleScale = useSharedValue(1);
+    const colorProgress = useSharedValue(isConnected ? 1 : 0);
 
     // Triple rings
     const ring1 = useSharedValue(0);
@@ -37,6 +41,11 @@ export function DashboardContent({ showChart = true }: { showChart?: boolean }) 
     const ring3 = useSharedValue(0);
 
     // --- Animation Logic ---
+
+    // Sync color progress
+    useEffect(() => {
+        colorProgress.value = withTiming(isConnected ? 1 : 0, { duration: 500 });
+    }, [isConnected]);
 
     // Idle Pulse
     useEffect(() => {
@@ -81,8 +90,10 @@ export function DashboardContent({ showChart = true }: { showChart?: boolean }) 
     // Connection Sequence Logic
     useEffect(() => {
         if (isConnecting) {
+            // Reset rotation and start linear spin
+            iconRotation.value = 0;
             iconRotation.value = withRepeat(
-                withTiming(360, { duration: 800 }),
+                withTiming(360, { duration: 800, easing: Easing.linear }),
                 -1,
                 false
             );
@@ -92,25 +103,55 @@ export function DashboardContent({ showChart = true }: { showChart?: boolean }) 
                 true
             );
         } else {
-            iconRotation.value = withTiming(0);
-            iconScale.value = withTiming(1, { duration: 300 });
+            // Final "Success Pop" if we just connected
+            if (isConnected) {
+                iconScale.value = withSequence(
+                    withSpring(1.4, { damping: 10, stiffness: 100 }),
+                    withSpring(1, { damping: 10, stiffness: 100 })
+                );
+            } else {
+                iconScale.value = withTiming(1, { duration: 300 });
+            }
+            // Stop rotation smoothly
+            iconRotation.value = withTiming(Math.round(iconRotation.value / 360) * 360, { duration: 500 });
         }
     }, [isConnecting]);
 
     // --- Animated Styles ---
-    const animatedButtonStyle = useAnimatedStyle(() => ({
-        transform: [
-            { scale: buttonScale.value },
-            { scale: idleScale.value }
-        ],
-    }));
+    const animatedButtonStyle = useAnimatedStyle(() => {
+        const bgColor = interpolateColor(
+            colorProgress.value,
+            [0, 1],
+            ['#09090b', '#84cc16']
+        );
+        const borderColor = interpolateColor(
+            colorProgress.value,
+            [0, 1],
+            ['#27272a', '#84cc16']
+        );
 
-    const animatedIconStyle = useAnimatedStyle(() => ({
-        transform: [
-            { rotate: `${iconRotation.value}deg` },
-            { scale: iconScale.value }
-        ],
-    }));
+        return {
+            backgroundColor: bgColor,
+            borderColor: borderColor,
+            transform: [
+                { scale: buttonScale.value },
+                { scale: idleScale.value }
+            ],
+            shadowColor: '#84cc16',
+            shadowOpacity: interpolate(colorProgress.value, [0, 1], [0, 0.5]),
+            shadowRadius: 20,
+            elevation: interpolate(colorProgress.value, [0, 1], [0, 10]),
+        };
+    });
+
+    const animatedIconStyle = useAnimatedStyle(() => {
+        return {
+            transform: [
+                { rotate: `${iconRotation.value}deg` },
+                { scale: iconScale.value }
+            ],
+        };
+    });
 
     const createRingStyle = (sharedValue: any) => {
         return useAnimatedStyle(() => ({
@@ -162,6 +203,9 @@ export function DashboardContent({ showChart = true }: { showChart?: boolean }) 
         return `${String(hrs).padStart(2, '0')} : ${String(mins).padStart(2, '0')} : ${String(secs).padStart(2, '0')}`;
     };
 
+    // Helper for Zap color
+    const zapColor = isConnected ? 'white' : '#71717a';
+
     return (
         <ScrollView
             className="flex-1"
@@ -171,8 +215,12 @@ export function DashboardContent({ showChart = true }: { showChart?: boolean }) 
             {/* Header */}
             <View className="flex-row items-center justify-between mb-6">
                 <View className="flex-row items-center gap-3">
-                    <View className="w-10 h-10 rounded-2xl bg-primary/20 items-center justify-center">
-                        <Shield size={20} color="#84cc16" />
+                    <View className="w-10 h-10 rounded-xl overflow-hidden items-center justify-center">
+                        <Image
+                            source={require('../../assets/logo.png')}
+                            className="w-full h-full"
+                            resizeMode="contain"
+                        />
                     </View>
                     <View>
                         <Text className="text-lg font-bold text-foreground">Karma VPN</Text>
@@ -180,62 +228,73 @@ export function DashboardContent({ showChart = true }: { showChart?: boolean }) 
                     </View>
                 </View>
                 <View className="flex-row items-center gap-2">
-                    <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full">
-                        <Settings size={20} color="white" />
-                    </Button>
-                    <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full">
-                        <Menu size={20} color="white" />
-                    </Button>
+                    {/* Icons removed as per user request */}
                 </View>
             </View>
 
             {/* Stats */}
             <View className="flex-row gap-3 mb-6">
-                <View className="flex-1 rounded-2xl bg-card p-4 border border-border/50">
-                    <View className="flex-row items-center justify-between mb-2">
-                        <View className="flex-row items-center gap-2">
-                            <View className="w-8 h-8 rounded-xl bg-primary/10 items-center justify-center">
-                                <TrendingDown className="rotate-180" size={16} color="#84cc16" />
+                <View className="flex-1 rounded-2xl overflow-hidden border border-border/30">
+                    <LinearGradient
+                        colors={['#18181b', '#09090b']}
+                        className="p-4 flex-1"
+                    >
+                        <View className="flex-row items-center justify-between mb-2">
+                            <View className="flex-row items-center gap-2">
+                                <View className="w-8 h-8 rounded-xl bg-[#5c9a3e]/10 items-center justify-center">
+                                    <TrendingDown className="rotate-180" size={16} color="#5c9a3e" />
+                                </View>
+                                <Text className="text-xs text-muted-foreground font-medium">Download</Text>
                             </View>
-                            <Text className="text-xs text-muted-foreground font-medium">Download</Text>
                         </View>
-                    </View>
-                    <Text className="text-2xl font-bold text-foreground">
-                        {downloadSpeed.toFixed(2)} <Text className="text-sm font-normal text-muted-foreground">Mb/s</Text>
-                    </Text>
+                        <Text className="text-2xl font-bold text-foreground">
+                            {downloadSpeed.toFixed(2)} <Text className="text-sm font-normal text-muted-foreground">Mb/s</Text>
+                        </Text>
+                    </LinearGradient>
                 </View>
-                <View className="flex-1 rounded-2xl bg-card p-4 border border-border/50">
-                    <View className="flex-row items-center justify-between mb-2">
-                        <View className="flex-row items-center gap-2">
-                            <View className="w-8 h-8 rounded-xl bg-primary/10 items-center justify-center">
-                                <TrendingUp size={16} color="#84cc16" />
+
+                <View className="flex-1 rounded-2xl overflow-hidden border border-border/30">
+                    <LinearGradient
+                        colors={['#18181b', '#09090b']}
+                        className="p-4 flex-1"
+                    >
+                        <View className="flex-row items-center justify-between mb-2">
+                            <View className="flex-row items-center gap-2">
+                                <View className="w-8 h-8 rounded-xl bg-[#5c9a3e]/10 items-center justify-center">
+                                    <TrendingUp size={16} color="#5c9a3e" />
+                                </View>
+                                <Text className="text-xs text-muted-foreground font-medium">Upload</Text>
                             </View>
-                            <Text className="text-xs text-muted-foreground font-medium">Upload</Text>
                         </View>
-                    </View>
-                    <Text className="text-2xl font-bold text-foreground">
-                        {uploadSpeed.toFixed(2)} <Text className="text-sm font-normal text-muted-foreground">Mb/s</Text>
-                    </Text>
+                        <Text className="text-2xl font-bold text-foreground">
+                            {uploadSpeed.toFixed(2)} <Text className="text-sm font-normal text-muted-foreground">Mb/s</Text>
+                        </Text>
+                    </LinearGradient>
                 </View>
             </View>
 
             {/* Network Activity Chart */}
-            {showChart && (
+            {showChart && isConnected && (
                 <View className="mb-6">
                     <NetworkActivityChart />
                 </View>
             )}
 
             {/* IP Address */}
-            <View className="flex-row items-center justify-center gap-2 mb-8 p-4 rounded-2xl bg-card border border-border/50">
-                <Globe size={16} color="#84cc16" />
-                <Text className="text-sm text-foreground font-medium">Your IP:</Text>
-                <Text className="text-sm text-muted-foreground font-mono">185.25.12.5</Text>
-                {isConnected && (
-                    <View className="ml-2 px-2 py-0.5 rounded-full bg-primary/10">
-                        <Text className="text-primary text-xs font-medium">Protected</Text>
-                    </View>
-                )}
+            <View className="mb-8 rounded-2xl overflow-hidden border border-border/30">
+                <LinearGradient
+                    colors={['#18181b', '#09090b']}
+                    className="flex-row items-center justify-center gap-2 p-4"
+                >
+                    <Globe size={16} color="#7db366" />
+                    <Text className="text-sm text-foreground font-medium">Your IP:</Text>
+                    <Text className="text-sm text-muted-foreground font-mono">185.25.12.5</Text>
+                    {isConnected && (
+                        <View className="ml-2 px-2 py-0.5 rounded-full bg-primary/10">
+                            <Text className="text-primary text-xs font-medium">Protected</Text>
+                        </View>
+                    )}
+                </LinearGradient>
             </View>
 
             {/* Connection Button */}
@@ -250,7 +309,7 @@ export function DashboardContent({ showChart = true }: { showChart?: boolean }) 
                                     width: 160,
                                     height: 160,
                                     borderRadius: 80,
-                                    backgroundColor: '#84cc16',
+                                    backgroundColor: '#5c9a3e',
                                 },
                                 glowStyle
                             ]}
@@ -267,7 +326,7 @@ export function DashboardContent({ showChart = true }: { showChart?: boolean }) 
                                         width: 144,
                                         height: 144,
                                         borderRadius: 72,
-                                        backgroundColor: '#84cc16',
+                                        backgroundColor: '#5c9a3e',
                                     },
                                     ring1Style
                                 ]}
@@ -279,7 +338,7 @@ export function DashboardContent({ showChart = true }: { showChart?: boolean }) 
                                         width: 144,
                                         height: 144,
                                         borderRadius: 72,
-                                        backgroundColor: '#84cc16',
+                                        backgroundColor: '#5c9a3e',
                                     },
                                     ring2Style
                                 ]}
@@ -291,7 +350,7 @@ export function DashboardContent({ showChart = true }: { showChart?: boolean }) 
                                         width: 144,
                                         height: 144,
                                         borderRadius: 72,
-                                        backgroundColor: '#84cc16',
+                                        backgroundColor: '#5c9a3e',
                                     },
                                     ring3Style
                                 ]}
@@ -299,41 +358,38 @@ export function DashboardContent({ showChart = true }: { showChart?: boolean }) 
                         </>
                     )}
 
-                    <Animated.View style={animatedButtonStyle}>
-                        <TouchableOpacity
-                            onPress={handleConnect}
-                            disabled={isConnecting}
-                            activeOpacity={0.9}
-                            style={{
-                                width: 144,
-                                height: 144,
-                                borderRadius: 72,
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                borderWidth: 4,
-                                borderColor: isConnected ? '#84cc16' : '#27272a',
-                                backgroundColor: isConnected ? '#84cc16' : '#09090b',
-                                shadowColor: isConnected ? '#84cc16' : '#000',
-                                shadowOffset: { width: 0, height: 0 },
-                                shadowOpacity: isConnected ? 0.5 : 0,
-                                shadowRadius: 20,
-                                elevation: isConnected ? 10 : 0,
-                            }}
+                    <TouchableOpacity
+                        onPress={handleConnect}
+                        disabled={isConnecting}
+                        activeOpacity={0.9}
+                    >
+                        <Animated.View
+                            style={[
+                                {
+                                    width: 144,
+                                    height: 144,
+                                    borderRadius: 72,
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    borderWidth: 4,
+                                },
+                                animatedButtonStyle
+                            ]}
                         >
                             <Animated.View style={animatedIconStyle}>
                                 <Zap
                                     size={56}
-                                    color={isConnected ? 'white' : '#71717a'}
+                                    color={zapColor}
                                     fill={isConnected ? 'white' : 'transparent'}
                                 />
                             </Animated.View>
-                        </TouchableOpacity>
-                    </Animated.View>
+                        </Animated.View>
+                    </TouchableOpacity>
                 </View>
 
                 <View className="items-center">
-                    <Text className={`text-sm font-medium mb-1 ${isConnected ? 'text-primary' : 'text-muted-foreground'}`}>
-                        {isConnecting ? 'Connecting...' : isConnected ? 'Connected' : 'Disconnected'}
+                    <Text className={`text-sm font-medium mb-1 ${isConnected ? 'text-[#5c9a3e]' : 'text-muted-foreground'}`}>
+                        {isConnecting ? 'Establishing...' : isConnected ? 'Connected' : 'Disconnected'}
                     </Text>
                     {isConnected && (
                         <Text className="text-3xl font-bold text-foreground font-mono tracking-tight">
@@ -343,30 +399,30 @@ export function DashboardContent({ showChart = true }: { showChart?: boolean }) 
                 </View>
             </View>
 
-            {/* Selected Server */}
-            <TouchableOpacity onPress={() => navigation.navigate('Servers')}>
-                <View className="w-full h-18 rounded-2xl bg-card flex-row items-center justify-between px-4 py-4 border border-border/50">
-                    <View className="flex-row items-center gap-3">
-                        <View className="w-12 h-12 rounded-full bg-primary/10 items-center justify-center border border-border/50">
-                            <Text className="text-2xl">{selectedServer.flag}</Text>
-                        </View>
-                        <View>
-                            <Text className="font-semibold text-foreground">{selectedServer.name}</Text>
-                            <Text className="text-xs text-muted-foreground">Tap to change server</Text>
-                        </View>
-                    </View>
-                    <View className="flex-row items-center gap-2">
-                        <View className="flex-row gap-0.5 items-end h-5">
-                            {[...Array(5)].map((_, i) => (
-                                <View
-                                    key={i}
-                                    className={`w-1 rounded-full ${i < selectedServer.signal ? 'bg-primary' : 'bg-muted'}`}
-                                    style={{ height: (i + 1) * 3 + 3 }}
+            {/* Selected Server Selector */}
+            <TouchableOpacity onPress={() => navigation.navigate('Servers')} activeOpacity={0.9}>
+                <View className="w-full h-18 rounded-3xl overflow-hidden border border-border/30">
+                    <LinearGradient
+                        colors={['#18181b', '#09090b']}
+                        className="flex-row items-center justify-between px-5 py-4 flex-1"
+                    >
+                        <View className="flex-row items-center gap-3">
+                            <View className="w-12 h-12 rounded-full overflow-hidden bg-[#5c9a3e]/10 border border-border/20">
+                                <Image
+                                    source={{ uri: selectedServer.flagUrl }}
+                                    className="w-full h-full"
+                                    resizeMode="cover"
                                 />
-                            ))}
+                            </View>
+                            <View>
+                                <Text className="font-bold text-foreground text-base">{selectedServer.name}</Text>
+                                <Text className="text-xs text-muted-foreground">Tap to change server</Text>
+                            </View>
                         </View>
-                        <ChevronRight size={20} color="white" />
-                    </View>
+                        <View className="w-10 h-10 rounded-full bg-zinc-800 items-center justify-center">
+                            <ChevronRight size={20} color="#7db366" />
+                        </View>
+                    </LinearGradient>
                 </View>
             </TouchableOpacity>
         </ScrollView>
