@@ -1,4 +1,5 @@
 export type CountryServer = {
+    id?: string // Added ID for backend servers
     name: string
     city: string
     flag: string

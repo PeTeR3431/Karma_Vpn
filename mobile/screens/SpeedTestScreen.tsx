@@ -118,8 +118,8 @@ export function SpeedTestScreen() {
                 {!hasStarted ? (
                     <View style={styles.centerContainer}>
                         <Animated.View entering={FadeInDown.duration(800)} style={styles.contentWrapper}>
-                            <View style={styles.zapContainer}>
-                                <Zap size={32} color="#5c9a3e" />
+                            <View className="w-20 h-20 rounded-3xl bg-white/5 items-center justify-center mb-6 border border-white/10">
+                                <Zap size={32} color="#4ade80" fill="#4ade80" />
                             </View>
                             <Text style={styles.title}>Speed Test</Text>
                             <Text style={styles.subtitle}>Check your connection speed and latency instantly.</Text>
@@ -130,7 +130,7 @@ export function SpeedTestScreen() {
                                 activeOpacity={0.8}
                             >
                                 <LinearGradient
-                                    colors={['#5c9a3e', '#45722f']}
+                                    colors={['#4ade80', '#22c55e']}
                                     style={styles.gradient}
                                     start={{ x: 0, y: 0 }}
                                     end={{ x: 1, y: 0 }}
@@ -155,7 +155,7 @@ export function SpeedTestScreen() {
                                 <SpeedStatCard icon="Activity" label="Ping" value={stats.ping.toString()} unit="ms" color="#A855F7" sparklineData={sparklines.ping} />
                             </Animated.View>
                             <Animated.View entering={FadeInDown.delay(200)}>
-                                <SpeedStatCard icon="ArrowDownCircle" label="Download" value={stats.download.toFixed(1)} unit="mbps" color="#5c9a3e" sparklineData={sparklines.download} />
+                                <SpeedStatCard icon="ArrowDownCircle" label="Download" value={stats.download.toFixed(1)} unit="mbps" color="#4ade80" sparklineData={sparklines.download} />
                             </Animated.View>
                             <Animated.View entering={FadeInDown.delay(300)}>
                                 <SpeedStatCard icon="ArrowUpCircle" label="Upload" value={stats.upload.toFixed(1)} unit="mbps" color="#38bdf8" sparklineData={sparklines.upload} />
@@ -173,7 +173,7 @@ export function SpeedTestScreen() {
                                     <View style={styles.buttonInner}>
                                         {isTesting ? (
                                             <View style={styles.testingContainer}>
-                                                <Activity size={16} color="#5c9a3e" />
+                                                <Activity size={16} color="#4ade80" />
                                                 <Text style={styles.testingText}>{testPhase}...</Text>
                                             </View>
                                         ) : (
@@ -185,7 +185,6 @@ export function SpeedTestScreen() {
                         </Animated.View>
                     </ScrollView>
                 )}
-                <GlassNavigationBar />
             </SafeAreaView>
         </AppBackground>
     );

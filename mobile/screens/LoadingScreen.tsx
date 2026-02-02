@@ -43,7 +43,7 @@ export function LoadingScreen() {
 
         // Auto transition
         const timer = setTimeout(() => {
-            navigation.replace('Home');
+            navigation.replace('Main');
         }, 2800);
 
         return () => clearTimeout(timer);
@@ -91,7 +91,7 @@ export function LoadingScreen() {
                     className="items-center mb-12"
                 >
                     <Text className="text-4xl font-bold tracking-tight text-foreground">
-                        <Text className="text-[#5c9a3e]">Karma</Text>
+                        <Text className="text-[#4ade80]">Karma</Text>
                         <Text className="text-muted-foreground font-normal"> VPN</Text>
                     </Text>
                     <Text className="text-sm text-muted-foreground mt-2 tracking-[4px] uppercase opacity-60">
@@ -100,10 +100,10 @@ export function LoadingScreen() {
                 </Animated.View>
 
                 {/* Progress Indicator */}
-                <View className="w-48 h-1.5 bg-card rounded-full overflow-hidden border border-border/20">
+                <View className="w-48 h-1 bg-white/10 rounded-full overflow-hidden border border-white/5">
                     <Animated.View
                         style={animatedProgressStyle}
-                        className="h-full bg-[#5c9a3e]"
+                        className="h-full bg-[#4ade80]"
                     />
                 </View>
 

@@ -15,7 +15,6 @@ export function HomeScreen() {
                 >
                     <DashboardContent showChart={false} />
                 </Animated.View>
-                <GlassNavigationBar />
             </SafeAreaView>
         </AppBackground>
     );

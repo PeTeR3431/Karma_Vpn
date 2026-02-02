@@ -1,47 +1,37 @@
-import React, { useMemo, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Platform, useWindowDimensions } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { Home, BarChart2, User, Zap } from 'lucide-react-native';
-import { useNavigation, useRoute } from '@react-navigation/native';
-import { LinearGradient } from 'expo-linear-gradient';
+import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import Animated, {
     useSharedValue,
     useAnimatedStyle,
     withSpring,
 } from 'react-native-reanimated';
 
-export function GlassNavigationBar() {
-    const navigation = useNavigation<any>();
-    const route = useRoute();
+export function GlassNavigationBar({ state, descriptors, navigation }: BottomTabBarProps) {
     const { width: windowWidth } = useWindowDimensions();
 
-    const tabs = useMemo(() => [
-        { id: 'Home', icon: Home, label: 'Home' },
-        { id: 'SpeedTest', icon: Zap, label: 'Speed' },
-        { id: 'Stats', icon: BarChart2, label: 'Stats' },
-        { id: 'Profile', icon: User, label: 'Profile' },
-    ], []);
+    const activeIndex = state.index;
 
-    const activeTab = route.name;
-    const activeIndex = useMemo(() => {
-        // More robust matching for route names (e.g., Home, HomeScreen, Dashboard)
-        const lowerActive = activeTab.toLowerCase();
-        const index = tabs.findIndex(tab => {
-            const lowerId = tab.id.toLowerCase();
-            return lowerActive === lowerId ||
-                lowerActive.includes(lowerId) ||
-                (tab.id === 'Home' && (lowerActive.includes('dashboard') || lowerActive.includes('welcome')));
-        });
-        return index === -1 ? 0 : index;
-    }, [activeTab, tabs]);
+    // Map route names to Icons and Labels
+    const getTabInfo = (routeName: string) => {
+        switch (routeName) {
+            case 'Home': return { icon: Home, label: 'Home' };
+            case 'SpeedTest': return { icon: Zap, label: 'Speed' };
+            case 'Stats': return { icon: BarChart2, label: 'Stats' };
+            case 'Profile': return { icon: User, label: 'Profile' };
+            default: return { icon: Home, label: routeName };
+        }
+    };
 
     // Reanimated shared value for sliding indicator
     const translateX = useSharedValue(0);
     const containerWidth = Math.min(windowWidth - 40, 400);
 
-    // Calculate tab width (3 tabs, padding included)
+    // Calculate tab width
     const paddingHorizontal = 10;
-    const tabWidth = (containerWidth - (paddingHorizontal * 2)) / tabs.length;
+    const tabWidth = (containerWidth - (paddingHorizontal * 2)) / state.routes.length;
 
     useEffect(() => {
         translateX.value = withSpring(activeIndex * tabWidth, {
@@ -56,40 +46,67 @@ export function GlassNavigationBar() {
         width: tabWidth,
     }));
 
+    // Hide tab bar on specific screens if needed (though typically handled by navigation options)
+    // const focusedOptions = descriptors[state.routes[state.index].key].options;
+    // if (focusedOptions.tabBarVisible === false) return null;
+
     return (
         <View style={styles.container}>
             <BlurView intensity={80} tint="dark" style={styles.blurContainer}>
                 <View style={styles.content}>
-                    {/* Sliding Indicator Background - Solid Lime Pill */}
-                    {/* Positioned FIRST in the children list to be at the bottom layer */}
+                    {/* Sliding Indicator Background */}
                     <Animated.View
                         style={[
                             styles.indicator,
                             animatedIndicatorStyle,
-                            { backgroundColor: '#5c9a3e' }
+                            { backgroundColor: '#4ade80' }
                         ]}
                     />
 
-                    {tabs.map((tab, index) => {
-                        const Icon = tab.icon;
-                        const isActive = activeIndex === index;
+                    {state.routes.map((route, index) => {
+                        const { options } = descriptors[route.key];
+                        const isFocused = state.index === index;
+                        const { icon: Icon, label } = getTabInfo(route.name);
+
+                        const onPress = () => {
+                            const event = navigation.emit({
+                                type: 'tabPress',
+                                target: route.key,
+                                canPreventDefault: true,
+                            });
+
+                            if (!isFocused && !event.defaultPrevented) {
+                                navigation.navigate(route.name, route.params);
+                            }
+                        };
+
+                        const onLongPress = () => {
+                            navigation.emit({
+                                type: 'tabLongPress',
+                                target: route.key,
+                            });
+                        };
 
                         return (
                             <TouchableOpacity
-                                key={tab.id}
-                                onPress={() => navigation.navigate(tab.id)}
+                                key={route.key}
+                                accessibilityRole="button"
+                                accessibilityState={isFocused ? { selected: true } : {}}
+                                accessibilityLabel={options.tabBarAccessibilityLabel}
+                                onPress={onPress}
+                                onLongPress={onLongPress}
                                 style={styles.tab}
                                 activeOpacity={0.7}
                             >
                                 <View style={styles.iconContainer}>
                                     <Icon
                                         size={20}
-                                        color={isActive ? '#000000' : '#71717a'}
-                                        strokeWidth={isActive ? 2.5 : 2}
+                                        color={isFocused ? '#000000' : '#71717a'}
+                                        strokeWidth={isFocused ? 2.5 : 2}
                                     />
-                                    {isActive && (
+                                    {isFocused && (
                                         <Text style={styles.activeLabel}>
-                                            {tab.label}
+                                            {label}
                                         </Text>
                                     )}
                                 </View>

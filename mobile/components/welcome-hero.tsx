@@ -8,12 +8,12 @@ export function WelcomeHero() {
             <View className="items-center justify-center mb-10 relative">
                 {/* Outer glow ring */}
                 <View
-                    className="absolute inset-0 rounded-full bg-[#5c9a3e]/20 scale-150 opacity-40"
-                    style={{ width: 150, height: 150 }}
+                    className="absolute rounded-full bg-[#4ade80]/10"
+                    style={{ width: 160, height: 160 }}
                 />
 
                 {/* Main logo container */}
-                <View className="flex h-32 w-32 items-center justify-center rounded-[32px] bg-secondary border border-border/50 overflow-hidden shadow-2xl">
+                <View className="flex h-32 w-32 items-center justify-center rounded-[32px] bg-white/5 border border-white/10 overflow-hidden">
                     <Image
                         source={require('../../assets/logo.png')}
                         className="w-24 h-24"
@@ -22,12 +22,12 @@ export function WelcomeHero() {
                 </View>
 
                 {/* Accent dot */}
-                <View className="absolute -bottom-1 h-2 w-8 rounded-full bg-[#5c9a3e]/60 opacity-50" />
+                <View className="absolute -bottom-1 h-2 w-8 rounded-full bg-[#4ade80]/40 opacity-50" />
             </View>
 
             {/* Brand Name */}
             <Text className="mb-4 text-4xl font-bold tracking-tight text-foreground text-center">
-                <Text className="text-[#5c9a3e]">Karma</Text>
+                <Text className="text-[#4ade80]">Karma</Text>
                 {"\n"}
                 <Text className="ml-2 text-muted-foreground font-normal text-3xl">VPN</Text>
             </Text>

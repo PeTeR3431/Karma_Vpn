@@ -1,20 +1,38 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { ConnectionProvider } from './mobile/lib/connection-context';
 import { LoadingScreen } from './mobile/screens/LoadingScreen';
-import { HomeScreen } from './mobile/screens/HomeScreen';
-import { StatsScreen } from './mobile/screens/StatsScreen';
 import { ServersScreen } from './mobile/screens/ServersScreen';
-import { ProfileScreen } from './mobile/screens/ProfileScreen';
 import { SettingsScreen } from './mobile/screens/SettingsScreen';
-import { SpeedTestScreen } from './mobile/screens/SpeedTestScreen';
 import { AboutScreen } from './mobile/screens/AboutScreen';
 import { StatusBar } from 'expo-status-bar';
+import { MainTabs } from './mobile/navigation/MainTabs';
+import 'react-native-get-random-values';
+import { v4 as uuidv4 } from 'uuid';
+import { getDeviceId, saveDeviceId } from './mobile/lib/storage';
 
 const Stack = createNativeStackNavigator();
 
 export default function App() {
+  useEffect(() => {
+    const initializeDeviceId = async () => {
+      try {
+        const id = await getDeviceId();
+        if (!id) {
+          const newId = uuidv4();
+          await saveDeviceId(newId);
+          console.log('Initiated new User Device ID:', newId);
+        } else {
+          console.log('User Device ID loaded:', id);
+        }
+      } catch (err) {
+        console.error('Failed to initialize Device ID', err);
+      }
+    };
+    initializeDeviceId();
+  }, []);
+
   return (
     <ConnectionProvider>
       <StatusBar style="light" />
@@ -28,12 +46,9 @@ export default function App() {
           initialRouteName="Loading"
         >
           <Stack.Screen name="Loading" component={LoadingScreen} />
-          <Stack.Screen name="Home" component={HomeScreen} />
-          <Stack.Screen name="Stats" component={StatsScreen} />
+          <Stack.Screen name="Main" component={MainTabs} />
           <Stack.Screen name="Servers" component={ServersScreen} />
-          <Stack.Screen name="Profile" component={ProfileScreen} />
           <Stack.Screen name="Settings" component={SettingsScreen} />
-          <Stack.Screen name="SpeedTest" component={SpeedTestScreen} />
           <Stack.Screen name="About" component={AboutScreen} />
         </Stack.Navigator>
       </NavigationContainer>

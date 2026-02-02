@@ -59,12 +59,12 @@ export function NetworkActivityChart() {
     };
 
     return (
-        <View className="rounded-2xl bg-card p-4 relative overflow-hidden border border-border/50">
+        <View className="rounded-2xl bg-white/5 p-4 relative overflow-hidden border border-white/10">
             <View className="mb-3 flex-row items-center justify-between">
                 <Text className="text-sm font-semibold text-foreground">Network Activity</Text>
                 <View className="flex-row items-center gap-2">
                     {/* Note: NativeWind doesn't support 'animate-pulse' well without config, just static for now */}
-                    <View className={`w-2 h-2 rounded-full ${isConnected ? 'bg-primary' : 'bg-muted'}`} />
+                    <View className={`w-2 h-2 rounded-full ${isConnected ? 'bg-[#4ade80]' : 'bg-muted'}`} />
                     <Text className="text-xs text-muted-foreground">{isConnected ? 'Live' : 'Inactive'}</Text>
                 </View>
             </View>
@@ -74,27 +74,29 @@ export function NetworkActivityChart() {
                     <Svg height="100%" width="100%" viewBox={`0 0 ${width} ${height}`}>
                         <Defs>
                             <LinearGradient id="gradient" x1="0" y1="0" x2="0" y2="1">
-                                <Stop offset="0%" stopColor="#5c9a3e" stopOpacity="0.3" />
-                                <Stop offset="100%" stopColor="#5c9a3e" stopOpacity="0" />
+                                <Stop offset="0%" stopColor="#4ade80" stopOpacity="0.3" />
+                                <Stop offset="100%" stopColor="#4ade80" stopOpacity="0" />
                             </LinearGradient>
                             <LinearGradient id="gradientUpload" x1="0" y1="0" x2="0" y2="1">
-                                <Stop offset="0" stopColor="#4ade80" stopOpacity={0.3} />
-                                <Stop offset="1" stopColor="#4ade80" stopOpacity={0.05} />
+                                <Stop offset="0" stopColor="#4ade80" stopOpacity={0.15} />
+                                <Stop offset="1" stopColor="#4ade80" stopOpacity={0} />
                             </LinearGradient>
                         </Defs>
                         <Path
                             d={createPath('download')}
                             fill="url(#gradient)"
-                            stroke="#5c9a3e"
+                            stroke="#4ade80"
                             strokeWidth="3"
                             strokeLinecap="round"
                             strokeLinejoin="round"
                         />
                         <Path
                             d={createPath('upload')}
-                            fill="url(#gradientUpload)"
-                            stroke="#4ade80"
+                            fill="none"
+                            stroke="#22c55e"
                             strokeWidth="1.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
                         />
                     </Svg>
                 </View>

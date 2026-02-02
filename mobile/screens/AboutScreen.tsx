@@ -16,7 +16,7 @@ export function AboutScreen() {
     const renderMenu = () => (
         <Animated.View entering={FadeInDown.duration(400)}>
             <View style={styles.card}>
-                <LinearGradient colors={['#18181b', '#09090b']} style={styles.cardInner}>
+                <View style={styles.cardInner}>
                     <AboutMenuItem
                         icon={Shield}
                         label="Privacy Policy"
@@ -28,7 +28,7 @@ export function AboutScreen() {
                         onPress={() => setView('terms')}
                         isLast
                     />
-                </LinearGradient>
+                </View>
             </View>
 
             <View style={styles.sectionHeader}>
@@ -36,10 +36,10 @@ export function AboutScreen() {
             </View>
 
             <View style={styles.card}>
-                <LinearGradient colors={['#18181b', '#09090b']} style={styles.cardInner}>
+                <View style={styles.cardInner}>
                     <AboutMenuItem icon={Star} label="Rate the app" />
                     <AboutMenuItem icon={Share2} label="Share with friends" isLast />
-                </LinearGradient>
+                </View>
             </View>
 
             <View style={styles.footer}>
@@ -105,7 +105,7 @@ export function AboutScreen() {
             <SafeAreaView className="flex-1" edges={['top', 'left', 'right']}>
                 <View style={styles.header}>
                     <TouchableOpacity onPress={handleBack} style={styles.backButton}>
-                        <ChevronLeft size={24} color="#5c9a3e" />
+                        <ChevronLeft size={24} color="#4ade80" />
                     </TouchableOpacity>
                     <Text style={styles.headerTitle}>
                         {view === 'menu' ? 'About' : view === 'privacy' ? 'Privacy' : 'Terms'}
@@ -121,7 +121,7 @@ export function AboutScreen() {
                     {view === 'menu' && (
                         <View style={styles.logoSection}>
                             <View style={styles.logoContainer}>
-                                <Info size={40} color="#5c9a3e" />
+                                <Info size={40} color="#4ade80" />
                             </View>
                             <Text style={styles.appName}>Karma VPN</Text>
                             <Text style={styles.tagline}>Secure • Private • fast</Text>
@@ -144,7 +144,7 @@ function AboutMenuItem({ icon: Icon, label, onPress, isLast }: { icon: any, labe
         >
             <View style={styles.menuItemLeft}>
                 <View style={styles.iconWrapper}>
-                    <Icon size={18} color="#5c9a3e" />
+                    <Icon size={18} color="#4ade80" />
                 </View>
                 <Text style={styles.menuItemLabel}>{label}</Text>
             </View>
@@ -195,11 +195,11 @@ const styles = StyleSheet.create({
         width: 80,
         height: 80,
         borderRadius: 24,
-        backgroundColor: '#18181b',
+        backgroundColor: 'rgba(255, 255, 255, 0.05)',
         alignItems: 'center',
         justifyContent: 'center',
         borderWidth: 1,
-        borderColor: 'rgba(92, 154, 62, 0.2)',
+        borderColor: 'rgba(74, 222, 128, 0.2)',
         marginBottom: 16,
     },
     appName: {
@@ -210,7 +210,7 @@ const styles = StyleSheet.create({
     },
     tagline: {
         fontSize: 12,
-        color: '#5c9a3e',
+        color: '#4ade80',
         textTransform: 'uppercase',
         letterSpacing: 3,
         marginTop: 4,
@@ -225,6 +225,7 @@ const styles = StyleSheet.create({
     },
     cardInner: {
         padding: 4,
+        backgroundColor: 'rgba(255, 255, 255, 0.05)',
     },
     menuItem: {
         flexDirection: 'row',
@@ -245,7 +246,7 @@ const styles = StyleSheet.create({
         width: 36,
         height: 36,
         borderRadius: 10,
-        backgroundColor: 'rgba(92, 154, 62, 0.1)',
+        backgroundColor: 'rgba(74, 222, 128, 0.1)',
         alignItems: 'center',
         justifyContent: 'center',
     },

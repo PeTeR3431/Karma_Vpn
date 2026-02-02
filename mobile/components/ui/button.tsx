@@ -66,7 +66,7 @@ const Button = React.forwardRef<React.ElementRef<typeof Pressable>, ButtonProps>
 
         const gradientColors: readonly [ColorValue, ColorValue, ...ColorValue[]] =
             variant === 'gradient'
-                ? ['#7db366', '#5c9a3e'] // Logo Green Gradient
+                ? ['#4ade80', '#22c55e'] // New Vibrant Green Gradient
                 : ['#18181b', '#09090b']; // Dark Zinc
 
         return (
