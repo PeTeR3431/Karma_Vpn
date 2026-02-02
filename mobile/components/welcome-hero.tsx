@@ -5,7 +5,7 @@ export function WelcomeHero() {
     return (
         <View className="items-center justify-center pt-8">
             {/* Logo with glow effect */}
-            <View className="items-center justify-center mb-6 relative">
+            <View className="items-center justify-center mb-2 relative">
                 {/* Outer glow ring */}
                 <View
                     className="absolute rounded-full bg-[#4ade80]/10"

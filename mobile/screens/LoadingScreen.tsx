@@ -67,7 +67,7 @@ export function LoadingScreen() {
         <SafeAreaView className="flex-1 bg-background items-center justify-center">
             <View className="items-center justify-center">
                 {/* Branded Logo with Pulsing Glow */}
-                <View className="relative items-center justify-center mb-6">
+                <View className="relative items-center justify-center mb-2">
                     <Animated.View
                         style={animatedGlowStyle}
                         className="absolute w-40 h-40 rounded-full bg-primary/30"
