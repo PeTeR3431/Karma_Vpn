@@ -13,10 +13,10 @@ export function WelcomeHero() {
                 />
 
                 {/* Main logo container */}
-                <View className="flex h-32 w-32 items-center justify-center rounded-[32px] bg-white/5 border border-white/10 overflow-hidden">
+                <View className="flex h-32 w-32 items-center justify-center">
                     <Image
                         source={require('../../assets/logo.png')}
-                        className="w-24 h-24"
+                        className="w-32 h-32"
                         resizeMode="contain"
                     />
                 </View>
