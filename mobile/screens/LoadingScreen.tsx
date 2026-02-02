@@ -75,11 +75,11 @@ export function LoadingScreen() {
 
                     <Animated.View
                         style={animatedLogoStyle}
-                        className="w-32 h-32 items-center justify-center"
+                        className="w-44 h-44 items-center justify-center"
                     >
                         <Image
                             source={require('../../assets/logo.png')}
-                            className="w-32 h-32"
+                            className="w-44 h-44"
                             resizeMode="contain"
                         />
                     </Animated.View>

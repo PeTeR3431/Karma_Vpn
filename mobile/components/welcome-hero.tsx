@@ -9,14 +9,14 @@ export function WelcomeHero() {
                 {/* Outer glow ring */}
                 <View
                     className="absolute rounded-full bg-[#4ade80]/10"
-                    style={{ width: 160, height: 160 }}
+                    style={{ width: 220, height: 220 }}
                 />
 
                 {/* Main logo container */}
-                <View className="flex h-32 w-32 items-center justify-center">
+                <View className="flex h-44 w-44 items-center justify-center">
                     <Image
                         source={require('../../assets/logo.png')}
-                        className="w-32 h-32"
+                        className="w-44 h-44"
                         resizeMode="contain"
                     />
                 </View>
