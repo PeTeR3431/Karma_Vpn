@@ -5,6 +5,8 @@ import { getDeviceId } from './storage';
 // Use LAN IP for best compatibility with simulators and devices
 export const API_URL = 'http://192.168.1.6:3000';
 
+console.log('🔌 Active API URL:', API_URL);
+
 const api = axios.create({
     baseURL: API_URL,
     timeout: 10000,

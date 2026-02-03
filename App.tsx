@@ -6,6 +6,7 @@ import { LoadingScreen } from './mobile/screens/LoadingScreen';
 import { ServersScreen } from './mobile/screens/ServersScreen';
 import { SettingsScreen } from './mobile/screens/SettingsScreen';
 import { AboutScreen } from './mobile/screens/AboutScreen';
+import { FaqScreen } from './mobile/screens/FaqScreen';
 import { StatusBar } from 'expo-status-bar';
 import { MainTabs } from './mobile/navigation/MainTabs';
 import 'react-native-get-random-values';
@@ -50,6 +51,7 @@ export default function App() {
           <Stack.Screen name="Servers" component={ServersScreen} />
           <Stack.Screen name="Settings" component={SettingsScreen} />
           <Stack.Screen name="About" component={AboutScreen} />
+          <Stack.Screen name="Faq" component={FaqScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     </ConnectionProvider>

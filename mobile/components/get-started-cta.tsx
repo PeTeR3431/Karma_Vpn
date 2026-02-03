@@ -28,7 +28,7 @@ export function GetStartedCTA() {
                 size="lg"
                 onPress={handleGetStarted}
                 disabled={isLoading}
-                className="group relative h-14 w-full rounded-2xl bg-[#4ade80] flex-row items-center justify-center"
+                className="group relative h-14 w-full rounded-2xl bg-[#60a5fa] flex-row items-center justify-center"
             >
                 {isLoading ? (
                     <>

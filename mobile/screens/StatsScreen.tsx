@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { NetworkActivityChart } from '@/components/network-activity-chart';
 import { GlassNavigationBar } from '@/components/glass-navigation-bar';
 import { Activity, Gauge } from 'lucide-react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { AppBackground } from '@/components/app-background';
@@ -54,8 +55,8 @@ export function StatsScreen() {
                         showsVerticalScrollIndicator={false}
                     >
                         <View className="flex-row items-center gap-3 mb-6 px-1">
-                            <View className="w-10 h-10 rounded-xl bg-white/5 items-center justify-center border border-white/10">
-                                <Activity size={20} color="#4ade80" />
+                            <View className="w-10 h-10 rounded-full bg-white/5 items-center justify-center border border-white/10">
+                                <Ionicons name="pie-chart" size={20} color="#60a5fa" />
                             </View>
                             <View>
                                 <Text className="text-xl font-bold text-foreground">Usage Stats</Text>
@@ -65,11 +66,24 @@ export function StatsScreen() {
 
                         {/* Stats Card */}
                         <View className="rounded-2xl bg-white/5 border border-white/10 overflow-hidden mb-6">
-                            <StatRow label="Total Sessions" value={stats.totalConnections.toString()} icon={Gauge} />
+                            <StatRow
+                                label="Total Sessions"
+                                value={stats.totalConnections.toString()}
+                                icon={(props) => <Ionicons name="stats-chart" {...props} />}
+                            />
                             <View className="h-[1px] bg-white/5 mx-4" />
-                            <StatRow label="Total Duration" value={formatDuration(stats.totalDuration)} icon={Activity} />
+                            <StatRow
+                                label="Total Duration"
+                                value={formatDuration(stats.totalDuration)}
+                                icon={(props) => <Ionicons name="timer" {...props} />}
+                            />
                             <View className="h-[1px] bg-white/5 mx-4" />
-                            <StatRow label="Data Usage" value={formatBytes(stats.totalBytes)} icon={Activity} isLast />
+                            <StatRow
+                                label="Total Data Usage"
+                                value={formatBytes(stats.totalBytes)}
+                                icon={(props) => <Ionicons name="wifi" {...props} />}
+                                isLast
+                            />
                         </View>
 
                         {isConnected ? (
@@ -79,8 +93,8 @@ export function StatsScreen() {
                             </View>
                         ) : (
                             <View className="mb-10 items-center justify-center py-10 px-6 rounded-2xl bg-white/5 border border-white/10">
-                                <View className="w-12 h-12 rounded-2xl bg-[#4ade80]/10 items-center justify-center mb-4">
-                                    <Activity size={24} color="#4ade80" />
+                                <View className="w-12 h-12 rounded-full bg-[#60a5fa]/10 items-center justify-center mb-4">
+                                    <Activity size={24} color="#60a5fa" />
                                 </View>
                                 <Text className="text-lg font-bold text-foreground mb-1 text-center">No Live Activity</Text>
                                 <Text className="text-sm text-muted-foreground text-center">Connect to VPN to see real-time chart.</Text>
@@ -93,12 +107,12 @@ export function StatsScreen() {
     );
 }
 
-function StatRow({ label, value, icon: Icon, isLast }: { label: string, value: string, icon: any, isLast?: boolean }) {
+function StatRow({ label, value, icon: Icon, isLast }: { label: string, value: string, icon: React.ComponentType<any>, isLast?: boolean }) {
     return (
         <View className="flex-row items-center justify-between p-4">
             <View className="flex-row items-center gap-3">
-                <View className="w-8 h-8 rounded-lg bg-white/5 items-center justify-center border border-white/10">
-                    <Icon size={14} color="#4ade80" />
+                <View className="w-8 h-8 rounded-full bg-white/5 items-center justify-center border border-white/10">
+                    <Icon size={14} color="#60a5fa" />
                 </View>
                 <Text className="text-muted-foreground font-medium">{label}</Text>
             </View>

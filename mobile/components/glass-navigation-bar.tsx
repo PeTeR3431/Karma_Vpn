@@ -1,8 +1,9 @@
 import React, { useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Platform, useWindowDimensions } from 'react-native';
 import { BlurView } from 'expo-blur';
-import { Home, BarChart2, User, Zap } from 'lucide-react-native';
+import { Ionicons, FontAwesome6, MaterialCommunityIcons } from '@expo/vector-icons';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
+import * as Haptics from 'expo-haptics';
 import Animated, {
     useSharedValue,
     useAnimatedStyle,
@@ -17,11 +18,11 @@ export function GlassNavigationBar({ state, descriptors, navigation }: BottomTab
     // Map route names to Icons and Labels
     const getTabInfo = (routeName: string) => {
         switch (routeName) {
-            case 'Home': return { icon: Home, label: 'Home' };
-            case 'SpeedTest': return { icon: Zap, label: 'Speed' };
-            case 'Stats': return { icon: BarChart2, label: 'Stats' };
-            case 'Profile': return { icon: User, label: 'Profile' };
-            default: return { icon: Home, label: routeName };
+            case 'Home': return { lib: Ionicons, name: 'home', label: 'Home' };
+            case 'SpeedTest': return { lib: Ionicons, name: 'speedometer', label: 'Speed' };
+            case 'Stats': return { lib: Ionicons, name: 'pie-chart', label: 'Stats' };
+            case 'Profile': return { lib: Ionicons, name: 'person-circle', label: 'Profile' };
+            default: return { lib: Ionicons, name: 'home', label: routeName };
         }
     };
 
@@ -29,21 +30,21 @@ export function GlassNavigationBar({ state, descriptors, navigation }: BottomTab
     const translateX = useSharedValue(0);
     const containerWidth = Math.min(windowWidth - 40, 400);
 
-    // Calculate tab width
+    // Calculate tab width accurately
     const paddingHorizontal = 10;
     const tabWidth = (containerWidth - (paddingHorizontal * 2)) / state.routes.length;
 
     useEffect(() => {
         translateX.value = withSpring(activeIndex * tabWidth, {
-            damping: 25,
-            stiffness: 180,
-            mass: 0.5
+            damping: 30,
+            stiffness: 200,
+            mass: 0.8
         });
     }, [activeIndex, tabWidth]);
 
     const animatedIndicatorStyle = useAnimatedStyle(() => ({
-        transform: [{ translateX: translateX.value }],
-        width: tabWidth,
+        transform: [{ translateX: translateX.value + 2 }],
+        width: tabWidth - 4,
     }));
 
     // Hide tab bar on specific screens if needed (though typically handled by navigation options)
@@ -59,16 +60,20 @@ export function GlassNavigationBar({ state, descriptors, navigation }: BottomTab
                         style={[
                             styles.indicator,
                             animatedIndicatorStyle,
-                            { backgroundColor: '#4ade80' }
+                            { backgroundColor: '#262626' }
                         ]}
                     />
 
                     {state.routes.map((route, index) => {
                         const { options } = descriptors[route.key];
                         const isFocused = state.index === index;
-                        const { icon: Icon, label } = getTabInfo(route.name);
+                        const { lib: Lib, name, label } = getTabInfo(route.name);
 
                         const onPress = () => {
+                            if (!isFocused) {
+                                Haptics.selectionAsync();
+                            }
+
                             const event = navigation.emit({
                                 type: 'tabPress',
                                 target: route.key,
@@ -98,17 +103,18 @@ export function GlassNavigationBar({ state, descriptors, navigation }: BottomTab
                                 style={styles.tab}
                                 activeOpacity={0.7}
                             >
-                                <View style={styles.iconContainer}>
-                                    <Icon
-                                        size={20}
-                                        color={isFocused ? '#000000' : '#71717a'}
-                                        strokeWidth={isFocused ? 2.5 : 2}
+                                <View style={styles.tabContent}>
+                                    <Lib
+                                        name={name}
+                                        size={24}
+                                        color={isFocused ? '#60a5fa' : '#ffffff'}
                                     />
-                                    {isFocused && (
-                                        <Text style={styles.activeLabel}>
-                                            {label}
-                                        </Text>
-                                    )}
+                                    <Text style={[
+                                        styles.label,
+                                        { color: isFocused ? '#60a5fa' : '#ffffff' }
+                                    ]}>
+                                        {label}
+                                    </Text>
                                 </View>
                             </TouchableOpacity>
                         );
@@ -156,27 +162,25 @@ const styles = StyleSheet.create({
     },
     indicator: {
         position: 'absolute',
-        top: 10,
-        bottom: 10,
-        left: 10,
-        borderRadius: 24,
-        overflow: 'hidden',
+        top: 2,
+        bottom: 2,
+        left: 10, // Matches paddingHorizontal
+        borderRadius: 30,
     },
     tab: {
         flex: 1,
-        height: 48,
+        height: 64,
         alignItems: 'center',
         justifyContent: 'center',
     },
-    iconContainer: {
-        flexDirection: 'row',
+    tabContent: {
         alignItems: 'center',
-        gap: 8,
+        justifyContent: 'center',
+        gap: 4,
     },
-    activeLabel: {
-        color: '#000000',
-        fontSize: 14,
-        fontWeight: '800',
+    label: {
+        fontSize: 13,
+        fontWeight: '900',
         letterSpacing: -0.2,
     },
 });

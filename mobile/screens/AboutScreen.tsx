@@ -105,7 +105,7 @@ export function AboutScreen() {
             <SafeAreaView className="flex-1" edges={['top', 'left', 'right']}>
                 <View style={styles.header}>
                     <TouchableOpacity onPress={handleBack} style={styles.backButton}>
-                        <ChevronLeft size={24} color="#4ade80" />
+                        <ChevronLeft size={24} color="#60a5fa" />
                     </TouchableOpacity>
                     <Text style={styles.headerTitle}>
                         {view === 'menu' ? 'About' : view === 'privacy' ? 'Privacy' : 'Terms'}
@@ -121,7 +121,7 @@ export function AboutScreen() {
                     {view === 'menu' && (
                         <View style={styles.logoSection}>
                             <View style={styles.logoContainer}>
-                                <Info size={40} color="#4ade80" />
+                                <Info size={40} color="#60a5fa" />
                             </View>
                             <Text style={styles.appName}>Karma VPN</Text>
                             <Text style={styles.tagline}>Secure • Private • fast</Text>
@@ -144,7 +144,7 @@ function AboutMenuItem({ icon: Icon, label, onPress, isLast }: { icon: any, labe
         >
             <View style={styles.menuItemLeft}>
                 <View style={styles.iconWrapper}>
-                    <Icon size={18} color="#4ade80" />
+                    <Icon size={18} color="#60a5fa" />
                 </View>
                 <Text style={styles.menuItemLabel}>{label}</Text>
             </View>
@@ -199,7 +199,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         borderWidth: 1,
-        borderColor: 'rgba(74, 222, 128, 0.2)',
+        borderColor: 'rgba(96, 165, 250, 0.2)',
         marginBottom: 16,
     },
     appName: {
@@ -210,7 +210,7 @@ const styles = StyleSheet.create({
     },
     tagline: {
         fontSize: 12,
-        color: '#4ade80',
+        color: '#60a5fa',
         textTransform: 'uppercase',
         letterSpacing: 3,
         marginTop: 4,
@@ -246,7 +246,7 @@ const styles = StyleSheet.create({
         width: 36,
         height: 36,
         borderRadius: 10,
-        backgroundColor: 'rgba(74, 222, 128, 0.1)',
+        backgroundColor: 'rgba(96, 165, 250, 0.1)',
         alignItems: 'center',
         justifyContent: 'center',
     },

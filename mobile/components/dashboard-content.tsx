@@ -8,57 +8,30 @@ import Animated, {
     withTiming,
     withSpring,
     withSequence,
-    withDelay,
-    interpolate,
-    interpolateColor,
-    FadeIn,
+    FadeInDown,
     Easing
 } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Shield, Zap, Globe, Clock, Settings, Menu, TrendingDown, TrendingUp, ChevronRight } from 'lucide-react-native';
-import { Button } from '@/components/ui/button';
+import { Clock, ChevronRight, ArrowDown, ArrowUp, Globe } from 'lucide-react-native';
 import { NetworkActivityChart } from '@/components/network-activity-chart';
 import { useConnection } from '@/lib/connection-context';
+import { GradientText } from './gradient-text';
 
 export function DashboardContent({ showChart = true }: { showChart?: boolean }) {
     const navigation = useNavigation<any>();
-    const { isConnected, selectedServer, connect, disconnect, isConnecting } = useConnection();
+    const { isConnected, selectedServer, connect, disconnect, isConnecting, hasUserSelected } = useConnection();
     const [connectionTime, setConnectionTime] = useState(0);
-    const [downloadSpeed, setDownloadSpeed] = useState(10.55);
-    const [uploadSpeed, setUploadSpeed] = useState(6.30);
+    const [downloadSpeed] = useState(10.55);
+    const [uploadSpeed] = useState(6.30);
 
     // --- Shared Values for Animations ---
     const buttonScale = useSharedValue(1);
     const iconRotation = useSharedValue(0);
     const iconScale = useSharedValue(1);
-    const glowValue = useSharedValue(0);
-    const idleScale = useSharedValue(1);
-    const colorProgress = useSharedValue(isConnected ? 1 : 0);
-
-    // --- Animation Logic ---
-
-    // Sync color progress
-    useEffect(() => {
-        colorProgress.value = withTiming(isConnected ? 1 : 0, { duration: 500 });
-    }, [isConnected]);
-
-    // No pulse scale
-    useEffect(() => {
-        idleScale.value = withTiming(1);
-    }, [isConnected, isConnecting]);
-
-    // No ripples
-
-    // No glow pulse
-    useEffect(() => {
-        glowValue.value = isConnected ? 1 : 0;
-    }, [isConnected]);
 
     // Connection Sequence Logic
     useEffect(() => {
         if (isConnecting) {
-            // Reset rotation and start linear spin
-            iconRotation.value = 0;
             iconRotation.value = withRepeat(
                 withTiming(360, { duration: 800, easing: Easing.linear }),
                 -1,
@@ -70,65 +43,24 @@ export function DashboardContent({ showChart = true }: { showChart?: boolean }) 
                 true
             );
         } else {
-            // Final "Success Pop" if we just connected
-            if (isConnected) {
-                iconScale.value = withSequence(
-                    withSpring(1.4, { damping: 10, stiffness: 100 }),
-                    withSpring(1, { damping: 10, stiffness: 100 })
-                );
-            } else {
-                iconScale.value = withTiming(1, { duration: 300 });
-            }
-            // Stop rotation smoothly
-            iconRotation.value = withTiming(Math.round(iconRotation.value / 360) * 360, { duration: 500 });
+            iconRotation.value = withTiming(0, { duration: 500 });
+            iconScale.value = withTiming(1, { duration: 300 });
         }
-    }, [isConnecting, isConnected]); // Added isConnected dependency
+    }, [isConnecting]);
 
     // --- Animated Styles ---
-    const animatedButtonStyle = useAnimatedStyle(() => {
-        const bgColor = interpolateColor(
-            colorProgress.value,
-            [0, 1],
-            ['#09090b', '#22c55e'] // Using a slightly more vibrant green
-        );
-        const borderColor = interpolateColor(
-            colorProgress.value,
-            [0, 1],
-            ['#27272a', '#4ade80'] // Brighter border for glow
-        );
-
-        // Steady glow effect when connected
-        const shadowRadius = isConnected ? 25 : interpolate(colorProgress.value, [0, 1], [0, 15]);
-
-        return {
-            backgroundColor: bgColor,
-            borderColor: borderColor,
-            transform: [
-                { scale: buttonScale.value },
-                { scale: idleScale.value }
-            ],
-            shadowColor: '#22c55e',
-            shadowOpacity: interpolate(colorProgress.value, [0, 1], [0, 1]),
-            shadowRadius: shadowRadius,
-            elevation: interpolate(colorProgress.value, [0, 1], [0, 20]),
-        };
-    });
-
-    const animatedIconStyle = useAnimatedStyle(() => {
-        return {
-            transform: [
-                { rotate: `${iconRotation.value}deg` },
-                { scale: iconScale.value }
-            ],
-        };
-    });
-
-    const glowStyle = useAnimatedStyle(() => ({
-        opacity: interpolate(glowValue.value, [0, 1], [0, 0.6]),
-        transform: [{ scale: interpolate(glowValue.value, [0, 1], [1, 1.1]) }],
+    const animatedButtonStyle = useAnimatedStyle(() => ({
+        transform: [{ scale: buttonScale.value }],
     }));
 
-    // Timer for connection duration
+    const animatedIconStyle = useAnimatedStyle(() => ({
+        transform: [
+            { rotate: `${iconRotation.value}deg` },
+            { scale: iconScale.value }
+        ],
+    }));
+
+    // Timer Logic
     useEffect(() => {
         let interval: NodeJS.Timeout;
         if (isConnected) {
@@ -142,11 +74,15 @@ export function DashboardContent({ showChart = true }: { showChart?: boolean }) 
     }, [isConnected]);
 
     const handleConnect = async () => {
-        // Trigger button overshoot
         buttonScale.value = withSequence(
             withSpring(1.1, { damping: 10, stiffness: 100 }),
             withSpring(1, { damping: 10, stiffness: 100 })
         );
+
+        if (!hasUserSelected) {
+            navigation.navigate('Servers');
+            return;
+        }
 
         if (isConnected) {
             await disconnect();
@@ -159,193 +95,141 @@ export function DashboardContent({ showChart = true }: { showChart?: boolean }) 
         const hrs = Math.floor(seconds / 3600);
         const mins = Math.floor((seconds % 3600) / 60);
         const secs = seconds % 60;
-        return `${String(hrs).padStart(2, '0')} : ${String(mins).padStart(2, '0')} : ${String(secs).padStart(2, '0')}`;
+        return `${String(hrs).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
     };
-
-    // Helper for Zap color
-    const zapColor = isConnected ? 'white' : '#71717a';
 
     return (
         <ScrollView
             className="flex-1"
-            contentContainerStyle={{ paddingHorizontal: 24, paddingTop: 16, paddingBottom: 140 }}
+            contentContainerStyle={{
+                paddingHorizontal: 24,
+                paddingTop: 20,
+                paddingBottom: 40,
+                flexGrow: 1
+            }}
             showsVerticalScrollIndicator={false}
         >
-            {/* Header */}
-            <View className="flex-row items-center justify-between mb-6">
-                <View className="flex-row items-center gap-4">
-                    <View className="w-12 h-12 rounded-xl overflow-hidden items-center justify-center">
-                        <Image
-                            source={require('../../assets/logo.png')}
-                            className="w-full h-full"
-                            resizeMode="contain"
-                        />
-                    </View>
-                    <View>
-                        <Text className="text-xl font-bold text-foreground">Karma VPN</Text>
-                    </View>
+            <View className="flex-1 justify-between">
+                {/* Minimalist Header - Now at the Top */}
+                <View className="items-center justify-center pt-10">
+                    <GradientText
+                        colors={['#ffffff', '#60a5fa']}
+                        style={{ fontSize: 24, fontWeight: '900', letterSpacing: -0.5 }}
+                    >
+                        KARMA VPN
+                    </GradientText>
                 </View>
-                <View className="flex-row items-center gap-2">
-                    {/* Icons removed as per user request */}
-                </View>
-            </View>
 
-            {/* Stats */}
-            <View className="flex-row gap-3 mb-6">
-                <View className="flex-1 rounded-2xl overflow-hidden border border-white/10 bg-white/5 p-4">
-                    <View className="flex-row items-center justify-between mb-2">
-                        <View className="flex-row items-center gap-2">
-                            <View className="w-8 h-8 rounded-xl bg-[#4ade80]/10 items-center justify-center">
-                                <TrendingDown className="rotate-180" size={16} color="#4ade80" />
+                {/* Central Functional Core */}
+                <View className="items-center justify-center py-10">
+                    {/* Connection Button - Focal Point */}
+                    <View className="items-center justify-center mb-10">
+                        <TouchableOpacity
+                            onPress={handleConnect}
+                            disabled={isConnecting}
+                            activeOpacity={0.8}
+                        >
+                            <Animated.View style={animatedButtonStyle}>
+                                <LinearGradient
+                                    colors={isConnected ? ['#3b82f6', '#2563eb'] : ['#1e293b', '#0f172a']}
+                                    style={{
+                                        width: 140,
+                                        height: 140,
+                                        borderRadius: 70,
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        borderWidth: 1,
+                                        borderColor: isConnected ? '#60a5fa' : '#334155',
+                                    }}
+                                >
+                                    <Animated.View style={animatedIconStyle}>
+                                        <Image
+                                            source={require('../../assets/stealth-icon.png')}
+                                            style={{
+                                                width: 150,
+                                                height: 150,
+                                                tintColor: isConnected ? 'white' : '#94a3b8'
+                                            }}
+                                            resizeMode="contain"
+                                        />
+                                    </Animated.View>
+                                </LinearGradient>
+                            </Animated.View>
+                        </TouchableOpacity>
+                    </View>
+
+                    {/* Server Selector - Now below Connection Button */}
+                    <TouchableOpacity
+                        onPress={() => navigation.navigate('Servers')}
+                        style={{ width: '100%' }}
+                        className="bg-white/5 border border-white/10 rounded-3xl p-4 flex-row items-center justify-between mb-10"
+                    >
+                        <View className="flex-row items-center gap-4">
+                            <View className="w-12 h-12 rounded-full overflow-hidden bg-white/10 items-center justify-center">
+                                {hasUserSelected && selectedServer?.flagUrl ? (
+                                    <Image
+                                        source={{ uri: selectedServer.flagUrl }}
+                                        className="w-full h-full"
+                                        resizeMode="cover"
+                                    />
+                                ) : (
+                                    <View className="bg-blue-500/20 p-2 rounded-full">
+                                        <Globe size={20} color="#60a5fa" />
+                                    </View>
+                                )}
                             </View>
-                            <Text className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Download</Text>
-                        </View>
-                    </View>
-                    <Text className="text-2xl font-bold text-foreground">
-                        {downloadSpeed.toFixed(2)} <Text className="text-xs font-normal text-muted-foreground">Mb/s</Text>
-                    </Text>
-                </View>
-
-                <View className="flex-1 rounded-2xl overflow-hidden border border-white/10 bg-white/5 p-4">
-                    <View className="flex-row items-center justify-between mb-2">
-                        <View className="flex-row items-center gap-2">
-                            <View className="w-8 h-8 rounded-xl bg-[#4ade80]/10 items-center justify-center">
-                                <TrendingUp size={16} color="#4ade80" />
+                            <View>
+                                <Text className="text-white font-bold text-base">
+                                    {hasUserSelected ? selectedServer?.name : "Select Server"}
+                                </Text>
+                                <Text className="text-[10px] text-zinc-500 font-bold uppercase">
+                                    {hasUserSelected ? "Change Server" : "Required to connect"}
+                                </Text>
                             </View>
-                            <Text className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Upload</Text>
                         </View>
-                    </View>
-                    <Text className="text-2xl font-bold text-foreground">
-                        {uploadSpeed.toFixed(2)} <Text className="text-xs font-normal text-muted-foreground">Mb/s</Text>
-                    </Text>
-                </View>
-            </View>
+                        <ChevronRight size={20} color="#64748b" />
+                    </TouchableOpacity>
 
-            {/* Network Activity Chart */}
-            {showChart && isConnected && (
-                <View className="mb-6">
-                    <NetworkActivityChart />
-                </View>
-            )}
-
-            {/* IP Address */}
-            <View className="mb-8 self-center rounded-full border border-white/10 bg-white/5 flex-row items-center justify-center gap-2 px-6 py-2">
-                <Globe size={14} color="#4ade80" />
-                <Text className="text-sm text-foreground font-medium">Your IP:</Text>
-                <Text className="text-sm text-muted-foreground font-mono">185.25.12.5</Text>
-                {isConnected && (
-                    <View className="ml-1 px-2 py-0.5 rounded-full bg-[#4ade80]/10 border border-[#4ade80]/20 items-center justify-center">
-                        <Text className="text-[#4ade80] text-[9px] font-bold uppercase tracking-wider">Protected</Text>
-                    </View>
-                )}
-            </View>
-
-            {/* Connection Button */}
-            <View className="items-center justify-center mb-12">
-                <View className="relative items-center justify-center">
-                    {/* Steady Glow background */}
+                    {/* Connection Timer */}
                     {isConnected && (
-                        <Animated.View
-                            style={[
-                                {
-                                    position: 'absolute',
-                                    width: 160,
-                                    height: 160,
-                                    borderRadius: 80,
-                                    backgroundColor: '#22c55e', // Match new green
-                                },
-                                glowStyle
-                            ]}
-                        />
+                        <View className="items-center mb-10">
+                            <View className="flex-row items-center gap-2 px-4 py-2 bg-blue-500/10 rounded-full border border-blue-500/20">
+                                <Clock size={16} color="#60a5fa" />
+                                <Text className="text-lg font-bold text-blue-400 mono">{formatTime(connectionTime)}</Text>
+                            </View>
+                        </View>
                     )}
 
-                    <TouchableOpacity
-                        onPress={handleConnect}
-                        disabled={isConnecting}
-                        activeOpacity={0.9}
-                    >
-                        <Animated.View
-                            style={[
-                                {
-                                    width: 144,
-                                    height: 144,
-                                    borderRadius: 72,
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    borderWidth: 4,
-                                },
-                                animatedButtonStyle
-                            ]}
-                        >
-                            <Animated.View style={animatedIconStyle}>
-                                <Zap
-                                    size={56}
-                                    color={zapColor}
-                                    fill={isConnected ? 'white' : 'transparent'}
-                                />
-                            </Animated.View>
+                    {/* Simple Stats Cards - Shown only when connected */}
+                    {isConnected && (
+                        <Animated.View entering={FadeInDown.duration(800)} className="flex-row gap-4">
+                            <View className="flex-1 bg-white/5 border border-white/10 rounded-3xl p-5">
+                                <View className="flex-row items-center gap-2 mb-2">
+                                    <ArrowDown size={14} color="#60a5fa" />
+                                    <Text className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Download</Text>
+                                </View>
+                                <Text className="text-2xl font-black text-white">{downloadSpeed.toFixed(2)} <Text className="text-xs text-zinc-500 font-normal">Mb/s</Text></Text>
+                            </View>
+                            <View className="flex-1 bg-white/5 border border-white/10 rounded-3xl p-5">
+                                <View className="flex-row items-center gap-2 mb-2">
+                                    <ArrowUp size={14} color="#a855f7" />
+                                    <Text className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Upload</Text>
+                                </View>
+                                <Text className="text-2xl font-black text-white">{uploadSpeed.toFixed(2)} <Text className="text-xs text-zinc-500 font-normal">Mb/s</Text></Text>
+                            </View>
                         </Animated.View>
-                    </TouchableOpacity>
+                    )}
+                </View>
+
+                {/* Footer Section */}
+                <View>
+                    {showChart && isConnected && (
+                        <View className="mb-8">
+                            <NetworkActivityChart />
+                        </View>
+                    )}
                 </View>
             </View>
-
-            {/* Connection Time / Timer */}
-            {isConnected && (
-                <Animated.View
-                    entering={FadeIn.duration(600)}
-                    className="mb-8 self-center rounded-full border border-white/10 bg-white/5 flex-row items-center justify-center gap-4 px-6 py-2"
-                >
-                    <View className="flex-row items-center gap-1.5">
-                        <Clock size={14} color="#4ade80" />
-                        <View className="flex-row items-center gap-1">
-                            <Text className="text-lg font-bold text-foreground">
-                                {String(Math.floor(connectionTime / 3600)).padStart(2, '0')}
-                            </Text>
-                            <Text className="text-[8px] text-muted-foreground uppercase font-bold tracking-widest">H</Text>
-                        </View>
-                    </View>
-
-                    <Text className="text-base font-bold text-muted-foreground/20" style={{ marginTop: -2 }}>:</Text>
-
-                    <View className="flex-row items-center gap-1">
-                        <Text className="text-lg font-bold text-foreground">
-                            {String(Math.floor((connectionTime % 3600) / 60)).padStart(2, '0')}
-                        </Text>
-                        <Text className="text-[8px] text-muted-foreground uppercase font-bold tracking-widest">M</Text>
-                    </View>
-
-                    <Text className="text-base font-bold text-muted-foreground/20" style={{ marginTop: -2 }}>:</Text>
-
-                    <View className="flex-row items-center gap-1">
-                        <Text className="text-lg font-bold text-[#4ade80]">
-                            {String(connectionTime % 60).padStart(2, '0')}
-                        </Text>
-                        <Text className="text-[8px] text-[#4ade80] uppercase font-bold tracking-widest">S</Text>
-                    </View>
-                </Animated.View>
-            )}
-
-            {/* Selected Server Selector */}
-            <TouchableOpacity onPress={() => navigation.navigate('Servers')} activeOpacity={0.9}>
-                <View className="rounded-2xl overflow-hidden border border-white/10 bg-white/5 p-4 flex-row items-center justify-between">
-                    <View className="flex-row items-center gap-3">
-                        <View className="w-12 h-12 rounded-full overflow-hidden bg-white/5 border border-white/10">
-                            <Image
-                                source={{ uri: selectedServer.flagUrl }}
-                                className="w-full h-full"
-                                resizeMode="cover"
-                            />
-                        </View>
-                        <View>
-                            <Text className="font-bold text-foreground text-base">{selectedServer.name}</Text>
-                            <Text className="text-xs text-muted-foreground">Tap to change server</Text>
-                        </View>
-                    </View>
-                    <View className="w-10 h-10 rounded-full bg-white/5 items-center justify-center border border-white/10">
-                        <ChevronRight size={20} color="#4ade80" />
-                    </View>
-                </View>
-            </TouchableOpacity>
         </ScrollView>
     );
 }

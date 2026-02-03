@@ -19,7 +19,11 @@ import Animated, {
     Easing
 } from 'react-native-reanimated';
 import { GlassNavigationBar } from '@/components/glass-navigation-bar';
-import { Zap, Play, Activity } from 'lucide-react-native';
+import { Play, Activity, Gauge } from 'lucide-react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { GradientText } from '@/components/gradient-text';
+import api from '@/lib/api';
+import { AxiosProgressEvent } from 'axios';
 
 const { width } = Dimensions.get('window');
 
@@ -55,56 +59,97 @@ export function SpeedTestScreen() {
         return () => clearAll();
     }, [clearAll]);
 
-    const runTest = useCallback(() => {
+    const runTest = useCallback(async () => {
         if (isTesting) return;
         clearAll();
         setIsTesting(true);
         setTestPhase('ping');
         setCurrentSpeed(0);
         setStats({ ping: 0, download: 0, upload: 0 });
+        setSparklines({
+            ping: Array(12).fill(0),
+            download: Array(20).fill(0),
+            upload: Array(15).fill(0)
+        });
 
-        pingIntervalRef.current = setInterval(() => {
-            const newVal = Math.floor(Math.random() * 8) + 12;
-            setStats(prev => ({ ...prev, ping: newVal }));
-            setSparklines(prev => ({ ...prev, ping: [...prev.ping.slice(1), newVal + Math.random() * 5] }));
-        }, 150);
+        try {
+            // --- PING TEST ---
+            // Take average of 5 pings
+            let totalPing = 0;
+            const pings = [];
+            for (let i = 0; i < 5; i++) {
+                const start = Date.now();
+                await api.get('/speedtest/ping');
+                const duration = Date.now() - start;
+                pings.push(duration);
+                totalPing += duration;
 
-        const t1 = setTimeout(() => {
-            if (pingIntervalRef.current) clearInterval(pingIntervalRef.current);
+                // Update stats immediately for visual feedback
+                const currentAvg = Math.round(totalPing / (i + 1));
+                setStats(prev => ({ ...prev, ping: currentAvg }));
+                setSparklines(prev => ({ ...prev, ping: [...prev.ping.slice(1), duration] }));
+                await new Promise(r => setTimeout(r, 100)); // Short delay between pings
+            }
+            const avgPing = Math.round(totalPing / 5);
+
+
+            // --- DOWNLOAD TEST ---
             setTestPhase('download');
-            let dVal = 0;
-            downloadIntervalRef.current = setInterval(() => {
-                const target = 54.80;
-                dVal = Math.min(target, dVal + (target / 30) + Math.random() * 3);
-                setCurrentSpeed(dVal);
-                setStats(prev => ({ ...prev, download: dVal }));
-                setSparklines(prev => ({ ...prev, download: [...prev.download.slice(1), dVal + Math.random() * 5] }));
-            }, 100);
+            const downloadStart = Date.now();
+            // Fetch ~10MB file
+            await api.get('/speedtest/download', {
+                responseType: 'blob',
+                onDownloadProgress: (progressEvent: AxiosProgressEvent) => {
+                    if (progressEvent.loaded && progressEvent.total) {
+                        const durationSec = (Date.now() - downloadStart) / 1000;
+                        if (durationSec > 0) {
+                            // Bytes * 8 = bits. Divide by 1,000,000 for Mbps.
+                            const mbps = (progressEvent.loaded * 8) / (1000 * 1000) / durationSec;
+                            setCurrentSpeed(mbps);
+                            setStats(prev => ({ ...prev, download: parseFloat(mbps.toFixed(2)) }));
+                            setSparklines(prev => ({
+                                ...prev,
+                                download: [...prev.download.slice(1), parseFloat(mbps.toFixed(2))]
+                            }));
+                        }
+                    }
+                }
+            });
 
-            const t2 = setTimeout(() => {
-                if (downloadIntervalRef.current) clearInterval(downloadIntervalRef.current);
-                setTestPhase('upload');
-                setCurrentSpeed(0);
-                let uVal = 0;
-                uploadIntervalRef.current = setInterval(() => {
-                    const target = 18.20;
-                    uVal = Math.min(target, uVal + (target / 25) + Math.random() * 2);
-                    setCurrentSpeed(uVal);
-                    setStats(prev => ({ ...prev, upload: uVal }));
-                    setSparklines(prev => ({ ...prev, upload: [...prev.upload.slice(1), uVal + Math.random() * 3] }));
-                }, 120);
 
-                const t3 = setTimeout(() => {
-                    if (uploadIntervalRef.current) clearInterval(uploadIntervalRef.current);
-                    setTestPhase('complete');
-                    setIsTesting(false);
-                    setCurrentSpeed(0);
-                }, 4000);
-                timeoutRefs.current.push(t3);
-            }, 5000);
-            timeoutRefs.current.push(t2);
-        }, 2000);
-        timeoutRefs.current.push(t1);
+            // --- UPLOAD TEST ---
+            setTestPhase('upload');
+            // Create 2MB dummy payload
+            const dummyData = new Array(2 * 1024 * 1024).fill('x').join('');
+            const uploadStart = Date.now();
+
+            await api.post('/speedtest/upload', { data: dummyData }, {
+                onUploadProgress: (progressEvent: AxiosProgressEvent) => {
+                    if (progressEvent.loaded && progressEvent.total) {
+                        const durationSec = (Date.now() - uploadStart) / 1000;
+                        if (durationSec > 0) {
+                            const mbps = (progressEvent.loaded * 8) / (1000 * 1000) / durationSec;
+                            setCurrentSpeed(mbps);
+                            setStats(prev => ({ ...prev, upload: parseFloat(mbps.toFixed(2)) }));
+                            setSparklines(prev => ({
+                                ...prev,
+                                upload: [...prev.upload.slice(1), parseFloat(mbps.toFixed(2))]
+                            }));
+                        }
+                    }
+                }
+            });
+
+            // --- COMPLETE ---
+            setTestPhase('complete');
+            setCurrentSpeed(0);
+
+        } catch (error) {
+            console.error("Speed Test Failed:", error);
+            setTestPhase('idle'); // Reset on error
+        } finally {
+            setIsTesting(false);
+        }
     }, [isTesting, clearAll]);
 
     const handleInitialStart = () => {
@@ -118,10 +163,17 @@ export function SpeedTestScreen() {
                 {!hasStarted ? (
                     <View style={styles.centerContainer}>
                         <Animated.View entering={FadeInDown.duration(800)} style={styles.contentWrapper}>
-                            <View className="w-20 h-20 rounded-3xl bg-white/5 items-center justify-center mb-6 border border-white/10">
-                                <Zap size={32} color="#4ade80" fill="#4ade80" />
+                            <View style={styles.iconContainer}>
+                                <Ionicons name="speedometer" size={32} color="#60a5fa" />
                             </View>
-                            <Text style={styles.title}>Speed Test</Text>
+                            <View className="items-center justify-center mb-10">
+                                <GradientText
+                                    colors={['#ffffff', '#60a5fa']}
+                                    style={{ fontSize: 24, fontWeight: '900', letterSpacing: -0.5 }}
+                                >
+                                    SPEED TEST
+                                </GradientText>
+                            </View>
                             <Text style={styles.subtitle}>Check your connection speed and latency instantly.</Text>
 
                             <TouchableOpacity
@@ -130,7 +182,7 @@ export function SpeedTestScreen() {
                                 activeOpacity={0.8}
                             >
                                 <LinearGradient
-                                    colors={['#4ade80', '#22c55e']}
+                                    colors={['#60a5fa', '#3b82f6']}
                                     style={styles.gradient}
                                     start={{ x: 0, y: 0 }}
                                     end={{ x: 1, y: 0 }}
@@ -142,9 +194,9 @@ export function SpeedTestScreen() {
                     </View>
                 ) : (
                     <ScrollView
-                        style={styles.scrollView}
+                        className="flex-1"
                         showsVerticalScrollIndicator={false}
-                        contentContainerStyle={styles.scrollContent}
+                        contentContainerStyle={[styles.scrollContent, { flexGrow: 1, justifyContent: 'center' }]}
                     >
                         <Animated.View entering={FadeIn.duration(600)} style={styles.gaugeWrapper}>
                             <SpeedGauge value={currentSpeed} unit="mbps" isTesting={isTesting} />
@@ -155,7 +207,7 @@ export function SpeedTestScreen() {
                                 <SpeedStatCard icon="Activity" label="Ping" value={stats.ping.toString()} unit="ms" color="#A855F7" sparklineData={sparklines.ping} />
                             </Animated.View>
                             <Animated.View entering={FadeInDown.delay(200)}>
-                                <SpeedStatCard icon="ArrowDownCircle" label="Download" value={stats.download.toFixed(1)} unit="mbps" color="#4ade80" sparklineData={sparklines.download} />
+                                <SpeedStatCard icon="ArrowDownCircle" label="Download" value={stats.download.toFixed(1)} unit="mbps" color="#60a5fa" sparklineData={sparklines.download} />
                             </Animated.View>
                             <Animated.View entering={FadeInDown.delay(300)}>
                                 <SpeedStatCard icon="ArrowUpCircle" label="Upload" value={stats.upload.toFixed(1)} unit="mbps" color="#38bdf8" sparklineData={sparklines.upload} />
@@ -173,7 +225,7 @@ export function SpeedTestScreen() {
                                     <View style={styles.buttonInner}>
                                         {isTesting ? (
                                             <View style={styles.testingContainer}>
-                                                <Activity size={16} color="#4ade80" />
+                                                <Activity size={16} color="#60a5fa" />
                                                 <Text style={styles.testingText}>{testPhase}...</Text>
                                             </View>
                                         ) : (
@@ -201,10 +253,10 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         width: '100%',
     },
-    zapContainer: {
+    iconContainer: {
         width: 80,
         height: 80,
-        borderRadius: 24,
+        borderRadius: 40,
         backgroundColor: '#18181b',
         borderWidth: 1,
         borderColor: 'rgba(255,255,255,0.05)',
@@ -213,11 +265,16 @@ const styles = StyleSheet.create({
         marginBottom: 24,
     },
     title: {
-        fontSize: 24,
-        fontWeight: 'bold',
+        fontSize: 28,
+        fontWeight: '900',
         color: '#ffffff',
-        textAlign: 'center',
-        marginBottom: 8,
+        letterSpacing: -0.8,
+    },
+    headerRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginBottom: 16,
     },
     subtitle: {
         fontSize: 14,
@@ -244,26 +301,23 @@ const styles = StyleSheet.create({
         textTransform: 'uppercase',
         letterSpacing: 1,
     },
-    scrollView: {
-        flex: 1,
+    scrollContent: {
+        paddingBottom: 32,
         paddingHorizontal: 24,
     },
-    scrollContent: {
-        paddingBottom: 160,
-    },
     gaugeWrapper: {
-        marginTop: 16,
-        marginBottom: 32,
+        marginTop: 0,
+        marginBottom: 24,
         alignItems: 'center',
     },
     statsList: {
         gap: 12,
     },
     actionWrapper: {
-        marginTop: 32,
+        marginTop: 24,
     },
     restartButton: {
-        height: 64,
+        height: 50,
         borderRadius: 16,
         overflow: 'hidden',
         borderWidth: 1,

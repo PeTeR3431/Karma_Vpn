@@ -91,7 +91,7 @@ export function LoadingScreen() {
                     className="items-center mb-12"
                 >
                     <Text className="text-4xl font-bold tracking-tight text-foreground">
-                        <Text className="text-[#4ade80]">Karma</Text>
+                        <Text className="text-[#60a5fa]">Karma</Text>
                         <Text className="text-muted-foreground font-normal"> VPN</Text>
                     </Text>
                     <Text className="text-sm text-muted-foreground mt-2 tracking-[4px] uppercase opacity-60">
@@ -103,7 +103,7 @@ export function LoadingScreen() {
                 <View className="w-48 h-1 bg-white/10 rounded-full overflow-hidden border border-white/5">
                     <Animated.View
                         style={animatedProgressStyle}
-                        className="h-full bg-[#4ade80]"
+                        className="h-full bg-[#60a5fa]"
                     />
                 </View>
 

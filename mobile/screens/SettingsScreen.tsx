@@ -28,7 +28,7 @@ export function SettingsScreen() {
                             onPress={() => navigation.goBack()}
                             className="w-10 h-10 rounded-full bg-white/5 items-center justify-center border border-white/10"
                         >
-                            <ChevronLeft size={24} color="#4ade80" />
+                            <ChevronLeft size={24} color="#60a5fa" />
                         </TouchableOpacity>
                         <Text className="text-xl font-bold text-foreground">Settings</Text>
                         <View className="w-10" />
@@ -65,8 +65,8 @@ export function SettingsScreen() {
                                 <View className="flex-row items-center justify-between mb-4">
                                     <View>
                                         <Text className="text-lg font-bold text-foreground">Auto-connect</Text>
-                                        <View className="mt-1 bg-[#4ade80]/20 self-start px-2 py-0.5 rounded-full border border-[#4ade80]/30">
-                                            <Text className="text-[10px] text-[#4ade80] font-bold uppercase">Premium</Text>
+                                        <View className="mt-1 bg-[#60a5fa]/20 self-start px-2 py-0.5 rounded-full border border-[#60a5fa]/30">
+                                            <Text className="text-[10px] text-[#60a5fa] font-bold uppercase">Premium</Text>
                                         </View>
                                     </View>
                                 </View>
@@ -77,7 +77,7 @@ export function SettingsScreen() {
                                         <Switch
                                             value={autoConnectStart}
                                             onValueChange={setAutoConnectStart}
-                                            trackColor={{ false: '#27272a', true: '#4ade80' }}
+                                            trackColor={{ false: '#27272a', true: '#60a5fa' }}
                                             thumbColor="white"
                                         />
                                     </View>
@@ -87,12 +87,12 @@ export function SettingsScreen() {
                                     <View className="flex-row items-center justify-between">
                                         <View className="flex-1 pr-4">
                                             <Text className="text-sm text-muted-foreground">Autoconnect on connection loss ikev2 (beta)</Text>
-                                            <TouchableOpacity><Text className="text-[#4ade80] text-xs font-medium mt-1">More</Text></TouchableOpacity>
+                                            <TouchableOpacity><Text className="text-[#60a5fa] text-xs font-medium mt-1">More</Text></TouchableOpacity>
                                         </View>
                                         <Switch
                                             value={autoConnectLoss}
                                             onValueChange={setAutoConnectLoss}
-                                            trackColor={{ false: '#27272a', true: '#4ade80' }}
+                                            trackColor={{ false: '#27272a', true: '#60a5fa' }}
                                             thumbColor="white"
                                         />
                                     </View>
@@ -107,7 +107,7 @@ export function SettingsScreen() {
                                 <Text className="text-lg font-bold text-foreground mb-3">Select Protocol</Text>
                                 <TouchableOpacity className="flex-row items-center justify-between bg-zinc-900/40 border border-white/10 rounded-2xl p-4 mb-8">
                                     <Text className="text-foreground font-medium">{protocol}</Text>
-                                    <ChevronDown size={20} color="#4ade80" />
+                                    <ChevronDown size={20} color="#60a5fa" />
                                 </TouchableOpacity>
 
                                 <View className="h-[1px] bg-white/5 mb-6" />
@@ -117,7 +117,7 @@ export function SettingsScreen() {
                                     <Switch
                                         value={killSwitch}
                                         onValueChange={setKillSwitch}
-                                        trackColor={{ false: '#27272a', true: '#4ade80' }}
+                                        trackColor={{ false: '#27272a', true: '#60a5fa' }}
                                         thumbColor="white"
                                     />
                                 </View>
@@ -130,7 +130,7 @@ export function SettingsScreen() {
                         {/* Restore Purchase Button */}
                         <TouchableOpacity className="mt-4 mb-10 overflow-hidden rounded-2xl">
                             <LinearGradient
-                                colors={['#4ade80', '#22c55e']}
+                                colors={['#60a5fa', '#3b82f6']}
                                 className="h-16 items-center justify-center"
                             >
                                 <Text className="text-zinc-950 font-bold text-lg uppercase tracking-wider">Restore purchase</Text>
@@ -151,8 +151,8 @@ function RadioButton({ label, selected, onPress, isFirst, isLast }: { label: str
             className={`flex-row items-center justify-between p-5 ${!isLast ? 'border-b border-white/5' : ''}`}
         >
             <Text className="text-base text-foreground font-medium">{label}</Text>
-            <View className={`w-6 h-6 rounded-full border-2 items-center justify-center ${selected ? 'border-[#4ade80]' : 'border-zinc-700'}`}>
-                {selected && <View className="w-3 h-3 rounded-full bg-[#4ade80]" />}
+            <View className={`w-6 h-6 rounded-full border-2 items-center justify-center ${selected ? 'border-[#60a5fa]' : 'border-zinc-700'}`}>
+                {selected && <View className="w-3 h-3 rounded-full bg-[#60a5fa]" />}
             </View>
         </TouchableOpacity>
     );

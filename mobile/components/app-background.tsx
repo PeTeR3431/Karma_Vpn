@@ -9,15 +9,23 @@ interface AppBackgroundProps {
 
 export function AppBackground({ children, className }: AppBackgroundProps) {
     return (
-        <View className={`flex-1 ${className}`}>
+        <View style={styles.container}>
             <LinearGradient
-                // Charcoal to Black gradient (Original Palette)
-                colors={['#181818', '#09090b']}
+                colors={['#0f1219', '#020617']}
                 style={StyleSheet.absoluteFill}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 0, y: 1 }}
             />
-            {children}
+            <View className={`flex-1 ${className}`}>
+                {children}
+            </View>
         </View>
     );
 }
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: '#020617',
+    }
+});

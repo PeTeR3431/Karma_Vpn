@@ -19,10 +19,10 @@ interface SpeedGaugeProps {
 }
 
 export function SpeedGauge({ value, unit, isTesting }: SpeedGaugeProps) {
-    const size = windowWidth * 0.82;
-    const strokeWidth = 20;
+    const size = windowWidth * 0.65;
+    const strokeWidth = 14;
     const center = size / 2;
-    const radius = (size - 100) / 2;
+    const radius = (size - 60) / 2;
 
     const animatedSpeed = useSharedValue(0);
 
@@ -73,7 +73,7 @@ export function SpeedGauge({ value, unit, isTesting }: SpeedGaugeProps) {
                         width: radius * 2,
                         height: radius * 2,
                         borderRadius: radius,
-                        backgroundColor: '#4ade8020',
+                        backgroundColor: '#60a5fa20',
                     }
                 ]}
             />
@@ -81,8 +81,8 @@ export function SpeedGauge({ value, unit, isTesting }: SpeedGaugeProps) {
             <Svg width={size} height={size * 0.85} viewBox={`0 0 ${size} ${size * 0.85}`}>
                 <Defs>
                     <LinearGradient id="gaugeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                        <Stop offset="0%" stopColor="#4ade80" stopOpacity="0.5" />
-                        <Stop offset="100%" stopColor="#4ade80" stopOpacity="1" />
+                        <Stop offset="0%" stopColor="#60a5fa" stopOpacity="0.5" />
+                        <Stop offset="100%" stopColor="#60a5fa" stopOpacity="1" />
                     </LinearGradient>
                     <LinearGradient id="trackGradient" x1="0%" y1="0%" x2="100%" y2="100%">
                         <Stop offset="0%" stopColor="#ffffff" stopOpacity="0.1" />
@@ -120,8 +120,8 @@ export function SpeedGauge({ value, unit, isTesting }: SpeedGaugeProps) {
 
                     return (
                         <G key={mark}>
-                            <Path d={`M ${p1.x} ${p1.y} L ${p2.x} ${p2.y}`} stroke={isActive ? '#4ade80' : '#3f3f46'} strokeWidth={1.5} />
-                            <SvgText x={textP.x} y={textP.y} fill={isActive ? '#4ade80' : '#71717a'} fontSize="10" fontWeight="bold" textAnchor="middle" alignmentBaseline="middle">
+                            <Path d={`M ${p1.x} ${p1.y} L ${p2.x} ${p2.y}`} stroke={isActive ? '#60a5fa' : '#3f3f46'} strokeWidth={1.5} />
+                            <SvgText x={textP.x} y={textP.y} fill={isActive ? '#60a5fa' : '#71717a'} fontSize="10" fontWeight="bold" textAnchor="middle" alignmentBaseline="middle">
                                 {mark}
                             </SvgText>
                         </G>
@@ -143,12 +143,12 @@ export function SpeedGauge({ value, unit, isTesting }: SpeedGaugeProps) {
 const styles = StyleSheet.create({
     valueContainer: {
         position: 'absolute',
-        top: '30%',
+        top: '28%',
         alignItems: 'center',
         justifyContent: 'center',
     },
     valueText: {
-        fontSize: 56,
+        fontSize: 40,
         fontWeight: '900',
         color: '#ffffff',
         letterSpacing: -2,
@@ -167,7 +167,7 @@ const styles = StyleSheet.create({
         width: 6,
         height: 6,
         borderRadius: 3,
-        backgroundColor: '#4ade80',
+        backgroundColor: '#60a5fa',
     },
     unitText: {
         fontSize: 10,

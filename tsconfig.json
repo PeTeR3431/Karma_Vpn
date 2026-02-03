@@ -8,5 +8,10 @@
         "./mobile/*"
       ]
     }
-  }
+  },
+  "exclude": [
+    "backend",
+    "admin",
+    "node_modules"
+  ]
 }

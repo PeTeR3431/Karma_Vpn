@@ -14,6 +14,7 @@ import {
     Share2,
     Info
 } from 'lucide-react-native';
+import { Ionicons, FontAwesome6, MaterialCommunityIcons } from '@expo/vector-icons';
 import { GlassNavigationBar } from '@/components/glass-navigation-bar';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { useNavigation } from '@react-navigation/native';
@@ -36,7 +37,7 @@ export function ProfileScreen() {
                             onPress={() => navigation.goBack()}
                             className="w-10 h-10 rounded-full bg-white/5 items-center justify-center border border-white/10"
                         >
-                            <ChevronLeft size={24} color="#4ade80" />
+                            <ChevronLeft size={24} color="#60a5fa" />
                         </TouchableOpacity>
                         <Text className="text-xl font-bold text-foreground">Menu</Text>
                         <View className="w-10" />
@@ -48,34 +49,55 @@ export function ProfileScreen() {
                         showsVerticalScrollIndicator={false}
                     >
                         <View className="mt-6 mb-8">
-                            <Text className="text-sm font-semibold text-muted-foreground mb-3 px-1 uppercase tracking-wider">Profile</Text>
+                            <Text className="text-[11px] font-black text-muted-foreground mb-4 px-1 uppercase tracking-[2px]">Your Profile</Text>
 
-                            <View className="rounded-[32px] overflow-hidden border border-white/10 bg-white/5">
-                                <View className="p-5 flex-row items-center justify-between border-b border-white/10">
-                                    <View className="flex-1">
-                                        <Text className="text-xs text-muted-foreground mb-1">Identity</Text>
-                                        <View className="flex-row items-center gap-2">
-                                            <Shield size={14} color="#4ade80" />
-                                            <Text className="text-sm text-foreground font-bold uppercase tracking-wide">
-                                                Protected
-                                            </Text>
+                            <View className="rounded-[32px] overflow-hidden border border-white/10 bg-zinc-900/60 shadow-xl">
+                                <LinearGradient
+                                    colors={['rgba(96, 165, 250, 0.1)', 'rgba(37, 99, 235, 0.03)']}
+                                    start={{ x: 0, y: 0 }}
+                                    end={{ x: 1, y: 1 }}
+                                    className="p-6"
+                                >
+                                    <View className="flex-row items-center justify-between mb-5">
+                                        <View className="flex-row items-center gap-4">
+                                            <View className="w-12 h-12 rounded-2xl bg-[#60a5fa]/15 items-center justify-center border border-[#60a5fa]/20 shadow-md shadow-blue-500/10">
+                                                <User size={24} color="#60a5fa" />
+                                            </View>
+                                            <View>
+                                                <Text className="text-lg font-black text-white">Ghost User</Text>
+                                                <View className="flex-row items-center gap-1 mt-0.5">
+                                                    <Shield size={10} color="#60a5fa" />
+                                                    <Text className="text-[9px] text-[#60a5fa] font-black uppercase tracking-tighter">Secured Identity</Text>
+                                                </View>
+                                            </View>
+                                        </View>
+                                        <View className="bg-white/5 rounded-xl px-3 py-1.5 border border-white/5">
+                                            <Text className="text-[9px] text-muted-foreground uppercase font-black tracking-widest text-center">Status</Text>
+                                            <Text className="text-[10px] font-black text-[#60a5fa] uppercase tracking-tighter text-center">Active</Text>
                                         </View>
                                     </View>
-                                    <View className="items-end">
-                                        <Text className="text-xs text-muted-foreground mb-1">Plan</Text>
-                                        <Text className="text-sm font-bold text-[#4ade80]">Anonymous</Text>
-                                    </View>
-                                </View>
 
-                                <View className="p-5">
-                                    <Text className="text-sm text-muted-foreground mb-3 font-medium">You don't have an active subscription</Text>
-                                    <TouchableOpacity className="flex-row items-center gap-2">
-                                        <View className="w-8 h-8 rounded-lg bg-[#4ade80]/10 items-center justify-center">
-                                            <Gem size={16} color="#4ade80" />
-                                        </View>
-                                        <Text className="text-base font-bold text-[#4ade80]">Get Premium</Text>
-                                    </TouchableOpacity>
-                                </View>
+                                    <View className="h-[1px] bg-white/5 w-full mb-5" />
+
+                                    <View>
+                                        <Text className="text-[13px] text-muted-foreground mb-5 font-medium leading-5">Global high-speed servers and unlimited bandwidth for maximum performance.</Text>
+
+                                        <TouchableOpacity
+                                            activeOpacity={0.8}
+                                            className="overflow-hidden rounded-xl"
+                                        >
+                                            <LinearGradient
+                                                colors={['#60a5fa', '#2563eb']}
+                                                start={{ x: 0, y: 0 }}
+                                                end={{ x: 1, y: 0 }}
+                                                className="h-12 items-center justify-center flex-row gap-2 px-6"
+                                            >
+                                                <MaterialCommunityIcons name="crown" size={18} color="#000" />
+                                                <Text className="text-[#000] font-black text-xs uppercase tracking-widest">Upgrade to Premium</Text>
+                                            </LinearGradient>
+                                        </TouchableOpacity>
+                                    </View>
+                                </LinearGradient>
                             </View>
                         </View>
 
@@ -84,17 +106,30 @@ export function ProfileScreen() {
 
                             <View className="rounded-[32px] overflow-hidden border border-white/10 bg-white/5">
                                 <MenuItem
-                                    icon={Settings}
+                                    icon={(props) => <Ionicons name="settings" {...props} />}
                                     label="Settings"
                                     isFirst
                                     onPress={() => navigation.navigate('Settings')}
                                 />
-                                <MenuItem icon={Gem} label="Subscription plans" />
-                                <MenuItem icon={BookOpen} label="FAQ & Support" />
-                                <MenuItem icon={Star} label="Rate the app" />
-                                <MenuItem icon={Share2} label="Share" />
                                 <MenuItem
-                                    icon={Info}
+                                    icon={(props) => <MaterialCommunityIcons name="crown" {...props} />}
+                                    label="Premium"
+                                />
+                                <MenuItem
+                                    icon={(props) => <Ionicons name="help-circle" {...props} />}
+                                    label="FAQ & Support"
+                                    onPress={() => navigation.navigate('Faq')}
+                                />
+                                <MenuItem
+                                    icon={(props) => <Ionicons name="star" {...props} />}
+                                    label="Rate the app"
+                                />
+                                <MenuItem
+                                    icon={(props) => <FontAwesome6 name="share" {...props} />}
+                                    label="Share"
+                                />
+                                <MenuItem
+                                    icon={(props) => <Ionicons name="information-circle" {...props} />}
                                     label="About"
                                     isLast
                                     onPress={() => navigation.navigate('About')}
@@ -115,7 +150,7 @@ function MenuItem({
     isLast,
     onPress
 }: {
-    icon: any,
+    icon: React.ComponentType<any>,
     label: string,
     isFirst?: boolean,
     isLast?: boolean,
@@ -128,8 +163,8 @@ function MenuItem({
             onPress={onPress}
         >
             <View className="flex-row items-center gap-4">
-                <View className="w-10 h-10 rounded-xl bg-[#4ade80]/10 items-center justify-center">
-                    <Icon size={20} color="#4ade80" />
+                <View className="w-10 h-10 rounded-full bg-[#60a5fa]/10 items-center justify-center">
+                    <Icon size={20} color="#60a5fa" />
                 </View>
                 <Text className="text-base font-medium text-foreground">{label}</Text>
             </View>
